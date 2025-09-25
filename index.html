@@ -17,7 +17,6 @@
     :root {
       --bg: #0b1220; --bg2: #0a0f1d; --text: #e5e7eb; --muted: #94a3b8;
       --card: #0f172a; --accent: #22d3ee; --accent2: #60a5fa;
-      --green: #22c55e; --amber: #f59e0b; --red: #f43f5e;
     }
     * { box-sizing: border-box; }
     html { scroll-behavior: smooth; }
@@ -56,23 +55,6 @@
     .card:hover { transform: translateY(-2px); border-color: rgba(96,165,250,.55); box-shadow: 0 12px 30px rgba(2,132,199,.18); }
     .feat { display: flex; gap: 12px; align-items: flex-start; }
     .feat .emoji { font-size: 24px; line-height: 1; }
-
-    /* Analyzer styles */
-    .analyzer { margin-top: 32px; }
-    .field { display:flex; gap:10px; flex-wrap:wrap; }
-    .input {
-      flex: 1 1 480px; min-width: 240px;
-      background: rgba(148,163,184,.12); color: var(--text); border: 1px solid rgba(148,163,184,.25);
-      border-radius: 10px; padding: 12px 14px; font-size: 16px;
-    }
-    .result { margin-top: 16px; }
-    .badge { display:inline-block; padding:4px 10px; border-radius:999px; font-size:12px; font-weight:800; letter-spacing:.03em; }
-    .safe { background:#16a34a20; color:#22c55e; border:1px solid #16a34a55; }
-    .suspicious { background:#f59e0b20; color:#f59e0b; border:1px solid #f59e0b55; }
-    .danger { background:#ef444420; color:#f43f5e; border:1px solid #f43f5e55; }
-    .muted { color: var(--muted); }
-    ul.tight { margin: 8px 0 0; padding-left: 18px; }
-
     .small { color: var(--muted); font-size: 14px; }
     footer { border-top: 1px solid rgba(148,163,184,.15); margin-top: 40px; padding: 18px 0; }
     code { background: rgba(148,163,184,.12); padding: 2px 6px; border-radius: 6px; }
@@ -82,50 +64,36 @@
       body { background: #f4f8ff; }
       .card { background: #fff; border-color: rgba(2,6,23,.08); }
       .btn-ghost { background: #fff; }
-      .input { background: #fff; }
     }
   </style>
 </head>
 <body>
   <div class="container">
     <nav class="nav">
-      <!-- Emoji after the name -->
+      <!-- Emoji moved after the name -->
       <div class="brand">
         <div class="text">PhishGuardian</div>
         <span class="emoji" aria-hidden="true">🐟</span>
       </div>
-      <div class="small">v0.1 — landing + URL analyzer</div>
+      <div class="small">v0.0 — landing only</div>
     </nav>
 
     <section class="hero">
-      <div class="kicker">Cyber safety • Built by a 2nd‑year cybersecurity student</div>
+      <!-- Updated to reflect it’s just you -->
+      <div class="kicker">Cyber safety • for everyone</div>
       <h1 class="title">Catch the bait before it catches you.</h1>
       <p class="subtitle">
         PhishGuardian helps you spot risky links and scam messages—fast, simple, and explainable.
-        This is our early build; the analyzer runs locally in your browser.
+        This is our early landing page; the analyzer is coming soon.
       </p>
       <div class="cta">
-        <a class="btn btn-primary" href="#analyzer">Try Analyzer</a>
+        <button class="btn btn-primary" onclick="comingSoon()">Try Analyzer (Coming soon)</button>
+        <!-- Join waitlist opens Gmail compose in a new tab -->
         <a class="btn btn-ghost" target="_blank"
            href="https://mail.google.com/mail/?view=cm&fs=1&to=yuvraj.patel@mitwpu.edu.in&su=PhishGuardian%20Waitlist&body=Hey%2C%20please%20add%20me%20to%20the%20waitlist.">
           Join waitlist
         </a>
         <a class="btn btn-ghost" href="#features">Learn more</a>
-      </div>
-    </section>
-
-    <!-- Analyzer -->
-    <section id="analyzer" class="analyzer card">
-      <div class="kicker">URL Analyzer (Preview)</div>
-      <p class="small">All analysis happens in your browser. We don’t send URLs anywhere.</p>
-      <form id="scanForm" class="field" autocomplete="off">
-        <input id="urlInput" class="input" type="text" placeholder="Paste a URL (e.g., https://secure-login-paypai.ru)" />
-        <button class="btn btn-primary" type="submit">Scan</button>
-      </form>
-      <div id="result" class="result" style="display:none">
-        <div><span id="verdictBadge" class="badge"></span> <span class="muted">Score: <span id="scoreVal">0</span></span></div>
-        <div class="small muted" id="normalizedLine" style="margin-top:6px"></div>
-        <div id="reasonsWrap" style="margin-top:10px"></div>
       </div>
     </section>
 
@@ -167,12 +135,12 @@
       <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:flex-start">
         <div>
           <div class="kicker">Status</div>
-          <div><strong>Phase: Landing + local analyzer</strong> — Threat intel & AI coming soon.</div>
+          <div><strong>Phase: Landing page</strong> — Analyzer UI and detection engine are in development.</div>
         </div>
       </div>
     </section>
 
-    <!-- Contact section -->
+    <!-- Contact section kept (with your email) -->
     <section id="contact" style="margin-top:24px">
       <div class="card">
         <div class="kicker">Contact</div>
@@ -192,118 +160,9 @@
   </div>
 
   <script>
-    // --- Simple client-side URL analyzer ---
-    const SUSPICIOUS_TLDS = [".ru", ".cn", ".top", ".gq", ".tk", ".zip", ".mov"];
-    const PHISHY_KEYWORDS = ["login","verify","update","secure","bonus","gift","alert","support","invoice","reset","account","bank","wallet","prize","free"];
-    const BRAND_MISSPELLS = { "paypai":"paypal", "micorsoft":"microsoft", "amaz0n":"amazon", "faceb00k":"facebook", "g00gle":"google" };
-
-    function normalizeUrl(u) {
-      let s = (u || "").trim();
-      if (!/^https?:\/\//i.test(s)) s = "http://" + s;
-      return s;
+    function comingSoon() {
+      alert("Analyzer is coming soon 🛠️\nWe’re building it step by step. Stay tuned!");
     }
-
-    function getHost(u) {
-      try {
-        const x = new URL(u);
-        return x.hostname.toLowerCase();
-      } catch(e) {
-        // fallback: strip scheme and path crudely
-        return (u.replace(/^https?:\/\//i,"").split("/")[0] || "").toLowerCase();
-      }
-    }
-
-    function isIPv4(host) {
-      const parts = host.split(".");
-      if (parts.length !== 4) return false;
-      return parts.every(p => /^\d{1,3}$/.test(p) && +p >= 0 && +p <= 255);
-    }
-
-    function analyzeUrlBasic(inputUrl) {
-      const raw = inputUrl;
-      const url = normalizeUrl(inputUrl);
-      const host = getHost(url);
-      const lower = url.toLowerCase();
-      const flags = [];
-      let score = 0;
-
-      // punycode/homoglyph
-      if (host.includes("xn--")) { flags.push("Domain uses punycode (possible homoglyph attack)."); score += 2; }
-
-      // IP host
-      if (isIPv4(host)) { flags.push("URL uses direct IP address instead of a domain."); score += 2; }
-
-      // Suspicious TLDs
-      for (const tld of SUSPICIOUS_TLDS) {
-        if (host.endsWith(tld)) { flags.push(`Suspicious domain extension: '${tld}'`); score += 2; break; }
-      }
-
-      // Many subdomains
-      if (!isIPv4(host) && (host.match(/\./g) || []).length >= 3) { flags.push("Unusually many subdomains (possible obfuscation)."); score += 1; }
-
-      // userinfo trick (user@host)
-      if (/\/\/[^\/]*@/.test(url)) { flags.push("Contains userinfo in URL (obfuscation trick)."); score += 1; }
-
-      // keywords
-      const kwHits = PHISHY_KEYWORDS.filter(k => lower.includes(k));
-      if (kwHits.length) { flags.push(`Contains risky keywords: ${kwHits.sort().join(", ")}`); score += Math.min(2, kwHits.length); }
-
-      // brand typos
-      const typoHits = Object.entries(BRAND_MISSPELLS).filter(([typo]) => lower.includes(typo));
-      if (typoHits.length) {
-        const list = typoHits.map(([t,b]) => `${t}→${b}`).join(", ");
-        flags.push("Possible typosquatting: " + list);
-        score += Math.min(2, typoHits.length);
-      }
-
-      // very long url
-      if (url.length > 120) { flags.push("Unusually long URL."); score += 1; }
-
-      let verdict = "Safe", badgeClass = "safe";
-      if (score >= 5) { verdict = "Dangerous"; badgeClass = "danger"; }
-      else if (score >= 2) { verdict = "Suspicious"; badgeClass = "suspicious"; }
-
-      return { raw, normalized: url, host, score, flags, verdict, badgeClass };
-    }
-
-    // UI wiring
-    const form = document.getElementById("scanForm");
-    const input = document.getElementById("urlInput");
-    const resultBox = document.getElementById("result");
-    const verdictBadge = document.getElementById("verdictBadge");
-    const scoreVal = document.getElementById("scoreVal");
-    const normalizedLine = document.getElementById("normalizedLine");
-    const reasonsWrap = document.getElementById("reasonsWrap");
-
-    form.addEventListener("submit", (e) => {
-      e.preventDefault();
-      const val = input.value.trim();
-      if (!val) return;
-
-      const res = analyzeUrlBasic(val);
-
-      verdictBadge.textContent = res.verdict;
-      verdictBadge.className = "badge " + res.badgeClass;
-      scoreVal.textContent = res.score;
-      normalizedLine.textContent = `URL: ${res.normalized}  •  Host: ${res.host}`;
-
-      if (res.flags.length) {
-        const ul = document.createElement("ul");
-        ul.className = "tight";
-        res.flags.forEach(f => {
-          const li = document.createElement("li");
-          li.textContent = f;
-          ul.appendChild(li);
-        });
-        reasonsWrap.innerHTML = "";
-        reasonsWrap.appendChild(ul);
-      } else {
-        reasonsWrap.innerHTML = '<div class="small muted">No obvious red flags detected.</div>';
-      }
-
-      resultBox.style.display = "block";
-      resultBox.scrollIntoView({ behavior: "smooth", block: "nearest" });
-    });
   </script>
 </body>
 </html>
