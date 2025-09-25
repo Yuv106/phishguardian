@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PhishGuardian — Catch the bait before it catches you</title>
+  <meta name="description" content="PhishGuardian helps you spot risky links and scam messages—fast, simple, and explainable." />
+  <meta name="theme-color" content="#0ea5e9" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%90%9F%F0%9F%9B%A1%EF%B8%8F%3C/text%3E%3C/svg%3E">
+
+  <!-- Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg: #0b1220; --bg2: #0a0f1d; --text: #e5e7eb; --muted: #94a3b8;
+      --card: #0f172a; --accent: #22d3ee; --accent2: #60a5fa;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(1200px 800px at 15% -10%, #0d1a33, transparent 50%),
+        radial-gradient(1000px 600px at 85% -20%, #0a1b2e, transparent 50%),
+        linear-gradient(180deg, var(--bg), var(--bg2));
+    }
+    .container { max-width: 1000px; margin: 0 auto; padding: 24px; }
+    .nav { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid rgba(148,163,184,.15); }
+    .brand { font-weight: 800; letter-spacing: .2px; display: flex; align-items: center; gap: 8px; }
+    .brand .text { background: linear-gradient(90deg, var(--accent), var(--accent2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .brand .emoji { font-size: 22px; }
+    .hero { padding: 56px 0 40px; display: grid; gap: 20px; }
+    .kicker { font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: .12em; }
+    .title { font-size: clamp(28px, 5vw, 44px); line-height: 1.1; margin: 0; }
+    .subtitle { color: var(--muted); font-size: clamp(15px, 2.5vw, 18px); margin: 8px 0 0; max-width: 60ch; }
+    .cta { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 18px; }
+    .btn {
+      appearance: none; border: 1px solid transparent; cursor: pointer; padding: 12px 16px; border-radius: 10px;
+      font-weight: 600; letter-spacing: .2px; transition: transform .04s ease, opacity .2s ease, box-shadow .2s ease, border-color .2s ease;
+    }
+    .btn:active { transform: translateY(1px); }
+    .btn:focus-visible { outline: 3px solid #93c5fd; outline-offset: 2px; }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #071427; box-shadow: 0 8px 24px rgba(14,165,233,.25);
+    }
+    .btn-ghost { background: rgba(148,163,184,.12); color: var(--text); border-color: rgba(148,163,184,.25); }
+    .btn:hover { border-color: rgba(96,165,250,.55); box-shadow: 0 10px 26px rgba(2,132,199,.18); }
+    .grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); margin-top: 32px; }
+    .card { background: rgba(15, 23, 42, .7); border: 1px solid rgba(148,163,184,.15); border-radius: 14px; padding: 18px; transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease; }
+    .card:hover { transform: translateY(-2px); border-color: rgba(96,165,250,.55); box-shadow: 0 12px 30px rgba(2,132,199,.18); }
+    .feat { display: flex; gap: 12px; align-items: flex-start; }
+    .feat .emoji { font-size: 24px; line-height: 1; }
+    .small { color: var(--muted); font-size: 14px; }
+    footer { border-top: 1px solid rgba(148,163,184,.15); margin-top: 40px; padding: 18px 0; }
+    code { background: rgba(148,163,184,.12); padding: 2px 6px; border-radius: 6px; }
+    @media (max-width: 520px) { .cta .btn { width: 100%; } }
+    @media (prefers-color-scheme: light) {
+      :root { --text: #0f172a; --muted: #475569; --card: #f8fafc; }
+      body { background: #f4f8ff; }
+      .card { background: #fff; border-color: rgba(2,6,23,.08); }
+      .btn-ghost { background: #fff; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <nav class="nav">
+      <!-- Emoji moved after the name -->
+      <div class="brand">
+        <div class="text">PhishGuardian</div>
+        <span class="emoji" aria-hidden="true">🐟</span>
+      </div>
+      <div class="small">v0.0 — landing only</div>
+    </nav>
+
+    <section class="hero">
+      <!-- Updated to reflect it’s just you -->
+      <div class="kicker">Cyber safety • for everyone</div>
+      <h1 class="title">Catch the bait before it catches you.</h1>
+      <p class="subtitle">
+        PhishGuardian helps you spot risky links and scam messages—fast, simple, and explainable.
+        This is our early landing page; the analyzer is coming soon.
+      </p>
+      <div class="cta">
+        <button class="btn btn-primary" onclick="comingSoon()">Try Analyzer (Coming soon)</button>
+        <!-- Join waitlist opens Gmail compose in a new tab -->
+        <a class="btn btn-ghost" target="_blank"
+           href="https://mail.google.com/mail/?view=cm&fs=1&to=yuvraj.patel@mitwpu.edu.in&su=PhishGuardian%20Waitlist&body=Hey%2C%20please%20add%20me%20to%20the%20waitlist.">
+          Join waitlist
+        </a>
+        <a class="btn btn-ghost" href="#features">Learn more</a>
+      </div>
+    </section>
+
+    <section id="features">
+      <div class="grid">
+        <div class="card feat">
+          <div class="emoji">🎣</div>
+          <div>
+            <div class="fw">Real phishing signals</div>
+            <div class="small">Typosquatting, suspicious TLDs, IP links, urgency bait, and more.</div>
+          </div>
+        </div>
+        <div class="card feat">
+          <div class="emoji">🛡️</div>
+          <div>
+            <div class="fw">Explainable results</div>
+            <div class="small">Clear reasons for every flag—no security jargon overload.</div>
+          </div>
+        </div>
+        <div class="card feat">
+          <div class="emoji">⚡</div>
+          <div>
+            <div class="fw">Fast & lightweight</div>
+            <div class="small">No login, no friction. Paste, scan, and decide.</div>
+          </div>
+        </div>
+        <div class="card feat">
+          <div class="emoji">🤖</div>
+          <div>
+            <div class="fw">AI roadmap</div>
+            <div class="small">Planned upgrades: NLP for scam text and OCR for screenshot scams.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Status card with Contact button removed -->
+    <section class="card" style="margin-top:24px">
+      <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:flex-start">
+        <div>
+          <div class="kicker">Status</div>
+          <div><strong>Phase: Landing page</strong> — Analyzer UI and detection engine are in development.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Contact section kept (with your email) -->
+    <section id="contact" style="margin-top:24px">
+      <div class="card">
+        <div class="kicker">Contact</div>
+        <div class="small">
+          Email: <a href="mailto:yuvraj.patel@mitwpu.edu.in">yuvraj.patel@mitwpu.edu.in</a>
+          • or <a target="_blank"
+            href="https://mail.google.com/mail/?view=cm&fs=1&to=yuvraj.patel@mitwpu.edu.in&su=PhishGuardian%20Contact">
+            write via Gmail
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <div class="small">© 2025 PhishGuardian • For educational and defensive use only. Don’t paste sensitive data.</div>
+    </footer>
+  </div>
+
+  <script>
+    function comingSoon() {
+      alert("Analyzer is coming soon 🛠️\nWe’re building it step by step. Stay tuned!");
+    }
+  </script>
+</body>
+</html>
