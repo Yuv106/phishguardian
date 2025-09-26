@@ -55,15 +55,69 @@ Currently in **Phase 1** (frontend complete), it runs fully in the **browser (
 
 ## 📌 Roadmap  
 
-- **Phase 1 (✅ Complete):** Frontend-only rules-based analyzer.  
-- **Phase 2 (🔜 Next):**  
-  - Add **Python (Flask) backend**.  
-  - Integrate **VirusTotal** / **OpenPhish** APIs for live threat checks.  
-  - Combine frontend rules + backend intelligence.  
-- **Phase 3:** Flask GUI + packaged tool.  
-- **Phase 4:** AI/NLP phishing detection + OCR for image phishing.  
-- **Phase 5:** Browser extension + Explainable AI (XAI) + research publication.  
+PhishGuardian Roadmap (Updated)
 
+Phase 1 — Frontend Rules-Based Analyzer (DONE, v1.0)
+
+Tech: HTML/CSS/JavaScript (client-side only)
+What it does:
+Detects suspicious TLDs (.ru, .cn, .tk, .zip, .mov), raw IPs, punycode (xn--), excessive subdomains, user@ trick, long URLs
+Softer keyword scoring (+1 total) and brand-typo detection (paypai, faceb00k, amaz0n, g00gle)
+Brand-abuse check (fake-hdfcbank.com flagged; official subdomains allowed)
+Whitelist (with subdomains): hdfcbank.com, microsoft.com, microsoftonline.com, paypal.com
+Verdicts: Safe (0–1), Suspicious (2–4), Dangerous (≥5)
+Deliverables:
+Live site (index.html) published to GitHub Pages
+README with features and roadmap
+Version tag: v1.0 — Phase 1 complete
+Phase 2 — Python Backend + Threat Intelligence (NEXT)
+
+Tech: Python (Flask), VirusTotal (and later OpenPhish), HTTPS deploy (Render/Railway)
+Goals:
+Build a small Flask API (POST /analyze) that takes a domain and returns VT stats + a score bump (+3 if malicious, +1 if suspicious)
+Add 1‑hour caching to reduce VT rate limits; enable CORS only for your site
+Deploy backend to an HTTPS host and update the frontend to call it
+Deliverables:
+Backend repo with app.py, requirements.txt, .env.example, deployment config
+Frontend shows a “VirusTotal → Malicious/Suspicious/Harmless” line and adjusts verdict accordingly
+Version tag: v2.0 — Backend online + VT integration
+Phase 3 — Smarter Rules + Text Analyzer (UX Boost)
+
+Tech: Regex, URL parsing libs, simple text processing
+Goals:
+Regex upgrades (encoded IPs, Unicode traps, excessive trackers)
+Text/Email analyzer: extract URLs from pasted text, run URL checks + “urgency/fear” language cues
+Move whitelist/keywords to a JSON config for easy edits
+Deliverables:
+Text analysis mode in UI
+Config JSON files (trusted domains, risky keywords)
+Version tag: v3.0
+Phase 4 — AI Engine (Baseline ML/NLP)
+
+Tech: scikit‑learn (TF‑IDF + Logistic Regression) → optional upgrade to Transformers
+Goals:
+Train a phishing vs. legit text classifier using public datasets
+Add /analyze-text endpoint in backend; combine ML probability with rule score
+Show top contributing tokens/phrases (basic explainability)
+Deliverables:
+Model file (.joblib), training script, evaluation report (e.g., F1 score)
+Version tag: v4.0
+Phase 5 — Packaging, Extension, and Recognition
+
+Goals:
+Browser extension (pre-check links via backend)
+Dockerize the backend; improve docs and screenshots
+Optional: blog/research write‑up
+Deliverables:
+Extension MVP, Dockerfile, polished README/docs
+Version tag: v5.0
+TL;DR Evolution
+
+v1.x: Frontend-only rules analyzer (DONE)
+v2.x: Python backend + VirusTotal
+v3.x: Regex/text analyzer + JSON configs
+v4.x: ML/NLP baseline + explainability
+v5.x: Packaging, browser extension, docs
 ---
 
 ## 🛡️ Disclaimer
@@ -75,4 +129,4 @@ Do not rely on PhishGuardian as a substitute for professional enterprise securit
 ## 👤 Author
 Made by **Yuvraj Patel**  
 📧 Email: [yuvraj.patel@mitwpu.edu.in](mailto:yuvraj.patel@mitwpu.edu.in)  
-2nd Year Cybersecurity Student · MITWPU  
+2nd Year CSE Cybersecurity Student · MITWPU  
