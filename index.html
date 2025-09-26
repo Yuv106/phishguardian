@@ -191,119 +191,155 @@
     </footer>
   </div>
 
-  <script>
-    // --- Simple client-side URL analyzer ---
-    const SUSPICIOUS_TLDS = [".ru", ".cn", ".top", ".gq", ".tk", ".zip", ".mov"];
-    const PHISHY_KEYWORDS = ["login","verify","update","secure","bonus","gift","alert","support","invoice","reset","account","bank","wallet","prize","free"];
-    const BRAND_MISSPELLS = { "paypai":"paypal", "micorsoft":"microsoft", "amaz0n":"amazon", "faceb00k":"facebook", "g00gle":"google" };
 
-    function normalizeUrl(u) {
-      let s = (u || "").trim();
-      if (!/^https?:\/\//i.test(s)) s = "http://" + s;
-      return s;
-    }
+<script>
+  // --- Simple client-side URL analyzer (v0.1.3) ---
+  const SUSPICIOUS_TLDS = [".ru", ".cn", ".top", ".gq", ".tk", ".zip", ".mov"];
+  const PHISHY_KEYWORDS = [
+    "login","verify","update","secure","bonus","gift","alert",
+    "support","invoice","reset","account","bank","wallet","prize","free"
+  ];
+  const BRAND_MISSPELLS = {
+    "paypai":"paypal", "micorsoft":"microsoft", "amaz0n":"amazon",
+    "faceb00k":"facebook", "g00gle":"google"
+  };
 
-    function getHost(u) {
-      try {
-        const x = new URL(u);
-        return x.hostname.toLowerCase();
-      } catch(e) {
-        // fallback: strip scheme and path crudely
-        return (u.replace(/^https?:\/\//i,"").split("/")[0] || "").toLowerCase();
+  // Official bases (domain + subdomains are trusted)
+  const WHITELIST_BASES = ["hdfcbank.com","microsoftonline.com","microsoft.com","paypal.com"];
+
+  function normalizeUrl(u) {
+    let s = (u || "").trim();
+    if (!/^https?:\/\//i.test(s)) s = "http://" + s;
+    return s;
+  }
+  function getHost(u) {
+    try { return new URL(u).hostname.toLowerCase(); }
+    catch(e) { return (u.replace(/^https?:\/\//i,"").split("/")[0] || "").toLowerCase(); }
+  }
+  function isIPv4(host) {
+    const parts = host.split(".");
+    if (parts.length !== 4) return false;
+    return parts.every(p => /^\d{1,3}$/.test(p) && +p >= 0 && +p <= 255);
+  }
+  function isUnderDomain(host, base) {
+    return host === base || host.endsWith("." + base);
+  }
+
+  function analyzeUrlBasic(inputUrl) {
+    const raw = inputUrl;
+    const url = normalizeUrl(inputUrl);
+    const host = getHost(url);
+    const lower = url.toLowerCase();
+    const flags = [];
+    let score = 0;
+
+    // Whitelist: allow official domains + their subdomains (safe), but not lookalikes
+    for (const base of WHITELIST_BASES) {
+      if (isUnderDomain(host, base)) {
+        return {
+          raw: raw, normalized: url, host: host, score: 0,
+          flags: [], verdict: "Safe", badgeClass: "safe"
+        };
       }
     }
 
-    function isIPv4(host) {
-      const parts = host.split(".");
-      if (parts.length !== 4) return false;
-      return parts.every(p => /^\d{1,3}$/.test(p) && +p >= 0 && +p <= 255);
+    // Punycode/homoglyph
+    if (host.includes("xn--")) { flags.push("Domain uses punycode (possible homoglyph attack)."); score += 2; }
+    // IP host
+    if (isIPv4(host)) { flags.push("URL uses direct IP address instead of a domain."); score += 2; }
+    // Suspicious TLDs
+    for (const tld of SUSPICIOUS_TLDS) {
+      if (host.endsWith(tld)) { flags.push(`Suspicious domain extension: '${tld}'`); score += 2; break; }
+    }
+    // Many subdomains
+    if (!isIPv4(host) && (host.match(/\./g) || []).length >= 3) {
+      flags.push("Unusually many subdomains (possible obfuscation)."); score += 1;
+    }
+    // userinfo trick (user@host)
+    if (/\/\/[^\/]*@/.test(url)) { flags.push("Contains userinfo in URL (obfuscation trick)."); score += 1; }
+
+    // Keywords (lighter scoring)
+    const kwHits = PHISHY_KEYWORDS.filter(k => lower.includes(k));
+    if (kwHits.length) { flags.push(`Contains common keywords: ${kwHits.join(", ")}`); score += 1; }
+
+    // Brand typos
+    const typoHits = Object.entries(BRAND_MISSPELLS).filter(([typo]) => lower.includes(typo));
+    if (typoHits.length) {
+      const list = typoHits.map(([t,b]) => `${t}→${b}`).join(", ");
+      flags.push("Possible typosquatting: " + list);
+      score += 2;
     }
 
-    function analyzeUrlBasic(inputUrl) {
-      const raw = inputUrl;
-      const url = normalizeUrl(inputUrl);
-      const host = getHost(url);
-      const lower = url.toLowerCase();
-      const flags = [];
-      let score = 0;
-
-      // punycode/homoglyph
-      if (host.includes("xn--")) { flags.push("Domain uses punycode (possible homoglyph attack)."); score += 2; }
-
-      // IP host
-      if (isIPv4(host)) { flags.push("URL uses direct IP address instead of a domain."); score += 2; }
-
-      // Suspicious TLDs
-      for (const tld of SUSPICIOUS_TLDS) {
-        if (host.endsWith(tld)) { flags.push(`Suspicious domain extension: '${tld}'`); score += 2; break; }
+    // Brand-abuse: brand words used outside their official domains
+    const BRAND_BASES = {
+      "hdfcbank": "hdfcbank.com",
+      "microsoft": "microsoftonline.com",
+      "paypal": "paypal.com"
+    };
+    for (const [brand, base] of Object.entries(BRAND_BASES)) {
+      if (host.includes(brand) && !isUnderDomain(host, base)) {
+        flags.push(`Suspicious use of brand '${brand}' in domain name`);
+        score += 2;
       }
-
-      // Many subdomains
-      if (!isIPv4(host) && (host.match(/\./g) || []).length >= 3) { flags.push("Unusually many subdomains (possible obfuscation)."); score += 1; }
-
-      // userinfo trick (user@host)
-      if (/\/\/[^\/]*@/.test(url)) { flags.push("Contains userinfo in URL (obfuscation trick)."); score += 1; }
-
-      // keywords
-      const kwHits = PHISHY_KEYWORDS.filter(k => lower.includes(k));
-      if (kwHits.length) { flags.push(`Contains risky keywords: ${kwHits.sort().join(", ")}`); score += Math.min(2, kwHits.length); }
-
-      // brand typos
-      const typoHits = Object.entries(BRAND_MISSPELLS).filter(([typo]) => lower.includes(typo));
-      if (typoHits.length) {
-        const list = typoHits.map(([t,b]) => `${t}→${b}`).join(", ");
-        flags.push("Possible typosquatting: " + list);
-        score += Math.min(2, typoHits.length);
-      }
-
-      // very long url
-      if (url.length > 120) { flags.push("Unusually long URL."); score += 1; }
-
-      let verdict = "Safe", badgeClass = "safe";
-      if (score >= 5) { verdict = "Dangerous"; badgeClass = "danger"; }
-      else if (score >= 2) { verdict = "Suspicious"; badgeClass = "suspicious"; }
-
-      return { raw, normalized: url, host, score, flags, verdict, badgeClass };
     }
 
-    // UI wiring
-    const form = document.getElementById("scanForm");
-    const input = document.getElementById("urlInput");
-    const resultBox = document.getElementById("result");
-    const verdictBadge = document.getElementById("verdictBadge");
-    const scoreVal = document.getElementById("scoreVal");
-    const normalizedLine = document.getElementById("normalizedLine");
-    const reasonsWrap = document.getElementById("reasonsWrap");
+    // Very long URL
+    if (url.length > 120) { flags.push("Unusually long URL."); score += 1; }
 
-    form.addEventListener("submit", (e) => {
-      e.preventDefault();
-      const val = input.value.trim();
-      if (!val) return;
+    // Verdict thresholds
+    let verdict = "Safe", badgeClass = "safe";
+    if (score >= 5) { verdict = "Dangerous"; badgeClass = "danger"; }
+    else if (score >= 2) { verdict = "Suspicious"; badgeClass = "suspicious"; }
 
-      const res = analyzeUrlBasic(val);
+    return {
+      raw: raw, normalized: url, host: host, score: score,
+      flags: flags, verdict: verdict, badgeClass: badgeClass
+    };
+  }
 
-      verdictBadge.textContent = res.verdict;
-      verdictBadge.className = "badge " + res.badgeClass;
-      scoreVal.textContent = res.score;
-      normalizedLine.textContent = `URL: ${res.normalized}  •  Host: ${res.host}`;
+  // --- UI wiring ---
+  const form = document.getElementById("scanForm");
+  const input = document.getElementById("urlInput");
+  const resultBox = document.getElementById("result");
+  const verdictBadge = document.getElementById("verdictBadge");
+  const scoreVal = document.getElementById("scoreVal");
+  const normalizedLine = document.getElementById("normalizedLine");
+  const reasonsWrap = document.getElementById("reasonsWrap");
 
-      if (res.flags.length) {
-        const ul = document.createElement("ul");
-        ul.className = "tight";
-        res.flags.forEach(f => {
-          const li = document.createElement("li");
-          li.textContent = f;
-          ul.appendChild(li);
-        });
-        reasonsWrap.innerHTML = "";
-        reasonsWrap.appendChild(ul);
-      } else {
-        reasonsWrap.innerHTML = '<div class="small muted">No obvious red flags detected.</div>';
-      }
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const val = input.value.trim();
+    if (!val) return;
 
-      resultBox.style.display = "block";
-      resultBox.scrollIntoView({ behavior: "smooth", block: "nearest" });
-    });
-  </script>
-</body>
-</html>
+    const res = analyzeUrlBasic(val);
+
+    verdictBadge.textContent = res.verdict;
+    verdictBadge.className = "badge " + res.badgeClass;
+    scoreVal.textContent = res.score;
+    normalizedLine.textContent = `URL: ${res.normalized}  •  Host: ${res.host}`;
+
+    if (res.flags.length) {
+      const ul = document.createElement("ul");
+      ul.className = "tight";
+      res.flags.forEach(f => {
+        const li = document.createElement("li");
+        li.textContent = f;
+        ul.appendChild(li);
+      });
+      reasonsWrap.innerHTML = "";
+      reasonsWrap.appendChild(ul);
+    } else {
+      reasonsWrap.innerHTML = '<div class="small muted">No obvious red flags detected.</div>';
+    }
+
+    resultBox.style.display = "block";
+    resultBox.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  });
+</script>
+
+
+
+
+
+
+ 
