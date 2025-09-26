@@ -1,4 +1,4 @@
-# 🐟🛡️ PhishGuardian
+# PhishGuardian 🐟
 
 **Live Demo (Frontend):** [https://yuv106.github.io/phishguardian/](https://yuv106.github.io/phishguardian/)  
 
