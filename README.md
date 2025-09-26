@@ -53,71 +53,86 @@ Currently in **Phase 1** (frontend complete), it runs fully in the **browser (
 
 ---
 
-## 📌 Roadmap  
-
-PhishGuardian Roadmap (Updated)
-
+🗺️ Roadmap
 Phase 1 — Frontend Rules-Based Analyzer (DONE, v1.0)
-
 Tech: HTML/CSS/JavaScript (client-side only)
-What it does:
-Detects suspicious TLDs (.ru, .cn, .tk, .zip, .mov), raw IPs, punycode (xn--), excessive subdomains, user@ trick, long URLs
-Softer keyword scoring (+1 total) and brand-typo detection (paypai, faceb00k, amaz0n, g00gle)
-Brand-abuse check (fake-hdfcbank.com flagged; official subdomains allowed)
-Whitelist (with subdomains): hdfcbank.com, microsoft.com, microsoftonline.com, paypal.com
+Capabilities:
+Suspicious TLDs (.ru, .cn, .tk, .zip, .mov), raw IPs, punycode (xn--), excessive subdomains
+user@host trick, long URL detection
+Gentle keyword scoring (+1 total)
+Brand typos (paypai, faceb00k, amaz0n, g00gle)
+Brand-abuse (e.g., fake-hdfcbank.com flagged)
+Whitelist (official domains + subdomains): microsoft.com, microsoftonline.com, hdfcbank.com, paypal.com
 Verdicts: Safe (0–1), Suspicious (2–4), Dangerous (≥5)
-Deliverables:
-Live site (index.html) published to GitHub Pages
-README with features and roadmap
-Version tag: v1.0 — Phase 1 complete
-Phase 2 — Python Backend + Threat Intelligence (NEXT)
+Deliverables: Live site (index.html), README
+Status: Completed
+Release: v1.0
 
-Tech: Python (Flask), VirusTotal (and later OpenPhish), HTTPS deploy (Render/Railway)
+
+
+Phase 2 — Python Backend + Threat Intelligence (NEXT, v2.0)
+Tech: Python (Flask), VirusTotal (later OpenPhish), HTTPS deploy (Render/Railway)
 Goals:
-Build a small Flask API (POST /analyze) that takes a domain and returns VT stats + a score bump (+3 if malicious, +1 if suspicious)
-Add 1‑hour caching to reduce VT rate limits; enable CORS only for your site
-Deploy backend to an HTTPS host and update the frontend to call it
+Build a small API: POST /analyze → returns VirusTotal stats + score bump
+Scoring hint: +3 if malicious ≥1, +1 if suspicious ≥1
+1‑hour caching to reduce rate limits
+CORS restricted to your site (e.g., https://yuv106.github.io)
+Frontend calls the backend, appends “VirusTotal → Malicious/Suspicious/Harmless” line, adjusts verdict
 Deliverables:
-Backend repo with app.py, requirements.txt, .env.example, deployment config
-Frontend shows a “VirusTotal → Malicious/Suspicious/Harmless” line and adjusts verdict accordingly
-Version tag: v2.0 — Backend online + VT integration
-Phase 3 — Smarter Rules + Text Analyzer (UX Boost)
+Backend repo (app.py, requirements.txt, .env.example, deploy config)
+HTTPS endpoint live on Render/Railway
+Frontend updated to use the endpoint
+Exit criteria:
+20 test domains (legit + known bad) show sensible results
+Live site works end-to-end (HTTPS → HTTPS)
+Release: v2.0
 
+
+
+Phase 3 — Smarter Rules + Text Analyzer (v3.0)
 Tech: Regex, URL parsing libs, simple text processing
 Goals:
-Regex upgrades (encoded IPs, Unicode traps, excessive trackers)
-Text/Email analyzer: extract URLs from pasted text, run URL checks + “urgency/fear” language cues
-Move whitelist/keywords to a JSON config for easy edits
-Deliverables:
-Text analysis mode in UI
-Config JSON files (trusted domains, risky keywords)
-Version tag: v3.0
-Phase 4 — AI Engine (Baseline ML/NLP)
+Regex upgrades: encoded IPs, mixed Unicode, excessive trackers
+Text/Email analyzer: extract URLs; add urgency/scare-language cues
+Move whitelist/keywords to JSON for easy editing (no code change)
+Deliverables: Text mode in UI, JSON config files
+Release: v3.0
 
-Tech: scikit‑learn (TF‑IDF + Logistic Regression) → optional upgrade to Transformers
+
+
+Phase 4 — AI Engine (Baseline ML/NLP) (v4.0)
+Tech: scikit-learn (TF‑IDF + Logistic Regression), optional Transformers
 Goals:
-Train a phishing vs. legit text classifier using public datasets
-Add /analyze-text endpoint in backend; combine ML probability with rule score
-Show top contributing tokens/phrases (basic explainability)
-Deliverables:
-Model file (.joblib), training script, evaluation report (e.g., F1 score)
-Version tag: v4.0
-Phase 5 — Packaging, Extension, and Recognition
+Train phishing vs. legit text classifier on public datasets
+Backend endpoint /analyze-text returns probability + top contributing tokens
+Combine ML probability with rule score for final verdict
+Deliverables: Model (.joblib), training script, evaluation report (e.g., F1 score)
+Release: v4.0
 
+
+
+Phase 5 — Packaging, Extension, Recognition (v5.0)
 Goals:
 Browser extension (pre-check links via backend)
-Dockerize the backend; improve docs and screenshots
-Optional: blog/research write‑up
-Deliverables:
-Extension MVP, Dockerfile, polished README/docs
-Version tag: v5.0
-TL;DR Evolution
+Dockerize backend; add screenshots, demo video, docs polish
+Optional blog/research write-up
+Deliverables: Extension MVP, Dockerfile, documentation
+Release: v5.0
 
-v1.x: Frontend-only rules analyzer (DONE)
-v2.x: Python backend + VirusTotal
+
+
+Version Plan
+v1.x: Frontend-only improvements (UI/rules)
+v2.x: Backend online + VirusTotal integration
 v3.x: Regex/text analyzer + JSON configs
 v4.x: ML/NLP baseline + explainability
-v5.x: Packaging, browser extension, docs
+v5.x: Packaging, extension, docs polish
+
+
+
+Repos
+Frontend (current): yuv106/phishguardian — GitHub Pages (index.html, README)
+Backend (Phase 2): yuv106/phishguardian-backend — Flask app (deployed to HTTPS)
 ---
 
 ## 🛡️ Disclaimer
