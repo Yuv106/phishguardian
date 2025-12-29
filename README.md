@@ -65,31 +65,6 @@ Example response:
 ```
 
 
-Not added yet (next steps):
-
-VirusTotal / OpenPhish integration
-
-Scoring logic from threat intelligence
-
-CORS restriction
-
-Deployment (Render / Railway)
-
-
-🗺️ Roadmap
-
-Phase 3: Smarter rules + text/email analyzer
-
-Phase 4: ML/NLP phishing classifier
-
-Phase 5: Browser extension + packaging
-
-
-⚠️ Disclaimer
-
-Educational project only.
-Do not paste sensitive or private data.
-
 
 
 
