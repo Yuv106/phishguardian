@@ -62,6 +62,19 @@ Example response:
   "suspicious": 0
 }
 
+```
+
+
+Not added yet (next steps):
+
+VirusTotal / OpenPhish integration
+
+Scoring logic from threat intelligence
+
+CORS restriction
+
+Deployment (Render / Railway)
+
 
 🗺️ Roadmap
 
@@ -76,6 +89,11 @@ Phase 5: Browser extension + packaging
 
 Educational project only.
 Do not paste sensitive or private data.
+
+
+
+
+
 
 
 
