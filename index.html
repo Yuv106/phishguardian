@@ -164,6 +164,23 @@
   </div>
 
 <script>
+  // --- Phase 2: Backend analyzer (Flask) ---
+  async function analyzeWithBackend(url) {
+    try {
+      const response = await fetch("http://127.0.0.1:5000/analyze", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ url })
+      });
+      return await response.json();
+    } catch (err) {
+      console.error("Backend not reachable", err);
+      return null;
+    }
+  }
+
   // --- Simple client-side URL analyzer (v1.0 — Phase 1) ---
   const SUSPICIOUS_TLDS = [".ru", ".cn", ".top", ".gq", ".tk", ".zip", ".mov"];
   const PHISHY_KEYWORDS = ["login","verify","update","secure","bonus","gift","alert","support","invoice","reset","account","bank","wallet","prize","free"];
@@ -179,7 +196,6 @@
     const raw=inputUrl; const url=normalizeUrl(inputUrl); const host=getHost(url); const lower=url.toLowerCase();
     const flags=[]; let score=0;
 
-    // Whitelist official domains + subdomains
     for(const base of WHITELIST_BASES){
       if(isUnderDomain(host,base)){
         return{raw,normalized:url,host,score:0,flags:[],verdict:"Safe",badgeClass:"safe"};
@@ -215,10 +231,17 @@
   }
 
   const form=document.getElementById("scanForm");
-  form.addEventListener("submit",(e)=>{
+  form.addEventListener("submit", async (e)=>{
     e.preventDefault();
-    const val=document.getElementById("urlInput").value.trim(); if(!val) return;
+    const val=document.getElementById("urlInput").value.trim(); 
+    if(!val) return;
+
+    // Phase 1 result
     const res=analyzeUrlBasic(val);
+
+    // Phase 2 call (non-blocking for now)
+    const backendRes = await analyzeWithBackend(val);
+    console.log("Backend result:", backendRes);
 
     document.getElementById("verdictBadge").textContent=res.verdict;
     document.getElementById("verdictBadge").className="badge "+res.badgeClass;
@@ -233,7 +256,6 @@
       const li=document.createElement("li");li.innerHTML='<span class="small muted">No obvious red flags.</span>';ul.appendChild(li);
     }
     reasonsWrap.innerHTML=""; reasonsWrap.appendChild(ul);
-
     document.getElementById("result").style.display="block";
   });
 </script>
