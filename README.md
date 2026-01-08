@@ -39,36 +39,10 @@ This project is built while learning — clean, simple, and understandable by de
 
 ---
 
-### ⚙️ Phase 2 — Python Backend (In Progress ✅)
+## Phase 2 — Python Backend (In Progress ✅)
 
-**What is done so far:**
-- Flask backend successfully set up
-- Local server running (`127.0.0.1:5000`)
-- Health check endpoint:
-  - `GET /` → confirms backend is alive
-- Analyzer API endpoint:
-  - `POST /analyze`
-  - Accepts JSON input with a URL
-  - Returns structured JSON response
-- Endpoint tested locally using PowerShell (`Invoke-RestMethod`)
-- Backend connected and verified end-to-end
-
-Example response:
-```json
-{
-  "url": "https://example.com",
-  "message": "Analyzer endpoint working",
-  "malicious": 0,
-  "suspicious": 0
-}
-
-```
-
-
-
-
-
-
-
-
-
+- Flask backend running locally
+- `/analyze` POST endpoint implemented
+- Frontend successfully connected via fetch()
+- CORS enabled for local development
+- Backend responses verified end-to-end
