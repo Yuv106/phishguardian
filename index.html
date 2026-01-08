@@ -237,26 +237,48 @@
     if(!val) return;
 
     // Phase 1 result
-    const res=analyzeUrlBasic(val);
+const res = analyzeUrlBasic(val);
 
-    // Phase 2 call (non-blocking for now)
-    const backendRes = await analyzeWithBackend(val);
-    console.log("Backend result:", backendRes);
+// Phase 2 call
+const backendRes = await analyzeWithBackend(val);
+console.log("Backend result:", backendRes);
 
-    document.getElementById("verdictBadge").textContent=res.verdict;
-    document.getElementById("verdictBadge").className="badge "+res.badgeClass;
-    document.getElementById("scoreVal").textContent=res.score;
-    document.getElementById("normalizedLine").textContent=`URL: ${res.normalized}  •  Host: ${res.host}`;
+document.getElementById("verdictBadge").textContent = res.verdict;
+document.getElementById("verdictBadge").className = "badge " + res.badgeClass;
+document.getElementById("scoreVal").textContent = res.score;
+document.getElementById("normalizedLine").textContent =
+  `URL: ${res.normalized}  •  Host: ${res.host}`;
 
-    const reasonsWrap=document.getElementById("reasonsWrap");
-    const ul=document.createElement("ul"); ul.className="tight";
-    if(res.flags.length){
-      res.flags.forEach(f=>{const li=document.createElement("li");li.textContent=f;ul.appendChild(li);});
-    }else{
-      const li=document.createElement("li");li.innerHTML='<span class="small muted">No obvious red flags.</span>';ul.appendChild(li);
-    }
-    reasonsWrap.innerHTML=""; reasonsWrap.appendChild(ul);
-    document.getElementById("result").style.display="block";
+const reasonsWrap = document.getElementById("reasonsWrap");
+const ul = document.createElement("ul");
+ul.className = "tight";
+
+// Phase 1 flags
+if (res.flags.length) {
+  res.flags.forEach(f => {
+    const li = document.createElement("li");
+    li.textContent = f;
+    ul.appendChild(li);
+  });
+} else {
+  const li = document.createElement("li");
+  li.innerHTML = '<span class="small muted">No obvious red flags.</span>';
+  ul.appendChild(li);
+}
+
+// Phase 2 backend message
+if (backendRes && backendRes.message) {
+  const li = document.createElement("li");
+  li.innerHTML = `<span class="small muted">Backend: ${backendRes.message}</span>`;
+  ul.appendChild(li);
+}
+
+// Attach once (important)
+reasonsWrap.innerHTML = "";
+reasonsWrap.appendChild(ul);
+
+document.getElementById("result").style.display = "block";
+
   });
 </script>
 </html>
