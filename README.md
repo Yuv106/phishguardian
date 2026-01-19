@@ -1,52 +1,67 @@
-# 🐟🛡️ PhishGuardian
+# 🐟 PhishGuardian
 
-**PhishGuardian** is a lightweight, explainable phishing detection project built step-by-step while learning cybersecurity and backend development.
+Catch the bait before it catches you.
 
-Live demo (Phase 1):  
-👉 https://yuv106.github.io/phishguardian/
+PhishGuardian is a lightweight, explainable phishing URL analyzer built to help users quickly identify suspicious links using transparent security checks.
 
----
-
-## 🔍 Overview
-
-PhishGuardian helps users identify suspicious URLs using transparent, explainable checks.
-
-- **Phase 1** runs fully in the browser (no data sent anywhere)
-- **Phase 2** introduces a Python backend API
-- Future phases add real threat intelligence and ML
-
-This project is built while learning — clean, simple, and understandable by design.
+Live demo (frontend):  
+https://yuv106.github.io/phishguardian/
 
 ---
 
 ## 🚀 Current Status
 
-### ✅ Phase 1 — Frontend Rules-Based Analyzer (Completed)
-- Client-side only (HTML / CSS / JavaScript)
-- Detects:
-  - Suspicious TLDs
-  - Raw IP URLs
-  - Punycode domains
-  - Excessive subdomains
-  - `user@host` tricks
-  - Brand typos & brand abuse
-- Verdicts:
-  - **Safe (0–1)**
-  - **Suspicious (2–4)**
-  - **Dangerous (5+)**
-- Fully explainable scoring
-- No backend, no tracking
+### ✅ Phase 1 — Frontend (Completed)
+- Rules-based phishing URL analyzer
+- Runs fully in the browser
+- No data collection or tracking
+- Explainable results (why a URL is flagged)
+
+Checks include:
+- Suspicious TLDs
+- Raw IP URLs
+- Punycode domains
+- Typosquatting & brand abuse
+- Excessive subdomains
+- Long / obfuscated URLs
 
 ---
 
-## Phase 2 — Python Backend (In Progress ✅)
-
-### Phase 2 – Python Backend (Live)
-
+### ✅ Phase 2 — Python Backend (LIVE)
 - Flask backend deployed on Render
 - `/analyze` API endpoint live
+- CORS enabled
+- Auto port binding for cloud deployment
 - Frontend automatically switches:
-  - Localhost → local backend
-  - GitHub Pages → Render backend
-- Used for validation & future intelligence hooks
+  - `localhost` → local backend
+  - GitHub Pages → live Render backend
+- Used for validation and future threat-intelligence integration
 
+Backend status:
+🟢 Live & reachable
+
+---
+
+## 🧭 Roadmap
+
+### 🔜 Phase 3 — Threat Intelligence
+- VirusTotal integration
+- OpenPhish / PhishTank feeds
+- Reputation-based scoring
+
+### 🔜 Phase 4 — Smart Detection
+- Heuristic weighting
+- Pattern correlation
+- Confidence score (0–100%)
+
+### 🔜 Phase 5 — UX & Distribution
+- Browser extension
+- Message / email link scanning
+- Enhanced explanations
+- Mobile optimization
+
+---
+
+## ⚠️ Disclaimer
+Educational project.  
+Do not submit sensitive or private URLs.
