@@ -41,8 +41,12 @@ This project is built while learning — clean, simple, and understandable by de
 
 ## Phase 2 — Python Backend (In Progress ✅)
 
-- Flask backend running locally
-- `/analyze` POST endpoint implemented
-- Frontend successfully connected via fetch()
-- CORS enabled for local development
-- Backend responses verified end-to-end
+### Phase 2 – Python Backend (Live)
+
+- Flask backend deployed on Render
+- `/analyze` API endpoint live
+- Frontend automatically switches:
+  - Localhost → local backend
+  - GitHub Pages → Render backend
+- Used for validation & future intelligence hooks
+
