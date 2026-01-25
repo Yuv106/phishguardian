@@ -62,79 +62,145 @@ async function analyzeWithBackend(url){
 /* ================= HEURISTICS ================= */
 
 /* 🔴 EXPANDED BRANDS */
+// -------- Expanded brand impersonation patterns --------
+
 const BRAND_MISSPELLS = {
-  /* Big Tech */
-  "goog1e":"google","g00gle":"google","google-secure":"google",
-  "micros0ft":"microsoft","microsofft":"microsoft","office365-login":"microsoft",
-  "appleid-login":"apple","icloud-login":"apple",
+  /* ===== Global Banks ===== */
+  "chase-login": "chase",
+  "chase-secure": "chase",
+  "citi-login": "citi",
+  "citibank-secure": "citi",
+  "hsbc-login": "hsbc",
+  "hsbc-secure": "hsbc",
+  "barclays-login": "barclays",
+  "barclays-secure": "barclays",
+  "boa-login": "bankofamerica",
+  "bankofamerica-secure": "bankofamerica",
+  "wellsfargo-login": "wellsfargo",
+  "wellsfargo-secure": "wellsfargo",
+  "db-login": "deutschebank",
+  "deutschebank-secure": "deutschebank",
 
-  /* Social */
-  "faceb00k":"facebook","fb-security":"facebook",
-  "instagrarn":"instagram","instagram-login":"instagram",
-  "whatsapp-secure":"whatsapp","whatsapp-support":"whatsapp",
-  "twltter":"twitter","x-login":"twitter",
-  "linkedin-secure":"linkedin",
+  /* ===== Indian Banks ===== */
+  "hdfc-login": "hdfcbank",
+  "hdfc-secure": "hdfcbank",
+  "icici-login": "icicibank",
+  "icici-secure": "icicibank",
+  "sbi-login": "sbi",
+  "sbi-secure": "sbi",
+  "axis-login": "axisbank",
+  "axis-secure": "axisbank",
+  "kotak-login": "kotakbank",
+  "kotak-secure": "kotakbank",
+  "pnb-login": "pnb",
+  "yesbank-login": "yesbank",
+  "bob-login": "bankofbaroda",
+  "unionbank-login": "unionbank",
 
-  /* Commerce */
-  "amaz0n":"amazon","amazon-refund":"amazon","amazon-pay":"amazon",
-  "flipkart-secure":"flipkart","meesho-login":"meesho",
+  /* ===== Crypto / Web3 ===== */
+  "binance-login": "binance",
+  "binance-secure": "binance",
+  "coinbase-login": "coinbase",
+  "coinbase-secure": "coinbase",
+  "kraken-login": "kraken",
+  "kraken-secure": "kraken",
+  "bitfinex-login": "bitfinex",
+  "bybit-login": "bybit",
+  "okx-login": "okx",
+  "kucoin-login": "kucoin",
+  "metamask-login": "metamask",
+  "metamask-secure": "metamask",
+  "trustwallet-login": "trustwallet",
+  "phantom-wallet": "phantom",
 
-  /* Payments / Fintech */
-  "paypa1":"paypal","paypai":"paypal","paypal-login":"paypal",
-  "phonepe-login":"phonepe","gpay-secure":"gpay","paytm-login":"paytm",
+  /* ===== SaaS / Cloud / Dev ===== */
+  "github-login": "github",
+  "gitlab-login": "gitlab",
+  "bitbucket-login": "bitbucket",
+  "aws-login": "aws",
+  "aws-secure": "aws",
+  "azure-login": "microsoft",
+  "google-cloud-login": "google",
+  "slack-login": "slack",
+  "notion-login": "notion",
+  "zoom-login": "zoom",
+  "dropbox-login": "dropbox",
+  "atlassian-login": "atlassian",
+  "jira-login": "atlassian",
+  "confluence-login": "atlassian",
 
-  /* Banks – India */
-  "hdfc-login":"hdfcbank","hdfc-secure":"hdfcbank",
-  "icici-login":"icicibank","sbi-login":"sbi",
-  "axis-login":"axisbank","kotak-login":"kotakbank",
-
-  /* Banks – Global */
-  "chase-login":"chase","citi-secure":"citi",
-  "hsbc-login":"hsbc","barclays-secure":"barclays",
-
-  /* Crypto */
-  "binance-login":"binance","coinbase-secure":"coinbase",
-  "metamask-login":"metamask","trustwallet-login":"trustwallet",
-
-  /* Govt India */
-  "uidai-login":"aadhaar","aadhaar-update":"aadhaar",
-  "digilocker-login":"digilocker","incometax-login":"incometax"
+  /* ===== Payments / Fintech ===== */
+  "paypal-login": "paypal",
+  "paypal-secure": "paypal",
+  "stripe-login": "stripe",
+  "wise-login": "wise",
+  "revolut-login": "revolut",
+  "paytm-login": "paytm",
+  "phonepe-login": "phonepe",
+  "gpay-login": "googlepay"
 };
 
+
 /* 🟢 EXPANDED WHITELIST */
+// -------- Trusted base domains (expanded, conservative) --------
+
 const WHITELIST_BASES = [
-  /* Google */
-  "google.com","gmail.com","youtube.com",
+  /* ===== Global Banks ===== */
+  "chase.com",
+  "citi.com",
+  "citibank.com",
+  "hsbc.com",
+  "barclays.co.uk",
+  "bankofamerica.com",
+  "wellsfargo.com",
+  "deutsche-bank.com",
 
-  /* Microsoft */
-  "microsoft.com","microsoftonline.com","office.com","outlook.com",
+  /* ===== Indian Banks ===== */
+  "hdfcbank.com",
+  "icicibank.com",
+  "sbi.co.in",
+  "axisbank.com",
+  "kotak.com",
+  "pnbindia.in",
+  "yesbank.in",
+  "bankofbaroda.in",
+  "unionbankofindia.co.in",
 
-  /* Apple */
-  "apple.com","icloud.com",
+  /* ===== Crypto ===== */
+  "binance.com",
+  "coinbase.com",
+  "kraken.com",
+  "bitfinex.com",
+  "bybit.com",
+  "okx.com",
+  "kucoin.com",
+  "metamask.io",
+  "trustwallet.com",
+  "phantom.app",
 
-  /* Social */
-  "facebook.com","instagram.com","whatsapp.com","linkedin.com","x.com","twitter.com",
+  /* ===== SaaS / Cloud ===== */
+  "github.com",
+  "gitlab.com",
+  "bitbucket.org",
+  "aws.amazon.com",
+  "azure.microsoft.com",
+  "cloud.google.com",
+  "slack.com",
+  "notion.so",
+  "zoom.us",
+  "dropbox.com",
+  "atlassian.com",
 
-  /* Dev / SaaS */
-  "github.com","gitlab.com","bitbucket.org",
-  "openai.com","chat.openai.com",
-  "notion.so","slack.com","zoom.us",
-
-  /* Commerce */
-  "amazon.com","amazon.in","flipkart.com","meesho.com",
-
-  /* Payments */
-  "paypal.com","paytm.com","phonepe.com","googlepay.com",
-
-  /* Banks India */
-  "hdfcbank.com","icicibank.com","sbi.co.in","axisbank.com","kotak.com",
-
-  /* Banks Global */
-  "chase.com","citi.com","hsbc.com","barclays.co.uk",
-
-  /* Govt India */
-  "uidai.gov.in","digilocker.gov.in","incometax.gov.in","india.gov.in"
+  /* ===== Payments ===== */
+  "paypal.com",
+  "stripe.com",
+  "wise.com",
+  "revolut.com",
+  "paytm.com",
+  "phonepe.com",
+  "googlepay.com"
 ];
+
 
 /* Other rules */
 const SUSPICIOUS_TLDS = [".ru",".cn",".tk",".xyz",".top",".site",".click",".support"];
