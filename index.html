@@ -1,334 +1,204 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>PhishGuardian — Catch the bait before it catches you</title>
-  <meta name="description" content="PhishGuardian helps you spot risky links and scam messages—fast, simple, and explainable." />
-  <meta name="theme-color" content="#0ea5e9" />
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%90%9F%F0%9F%9B%A1%EF%B8%8F%3C/text%3E%3C/svg%3E">
-
-  <!-- Google Font -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-
-  <style>
-    :root {
-      --bg: #0b1220; --bg2: #0a0f1d; --text: #e5e7eb; --muted: #94a3b8;
-      --card: #0f172a; --accent: #22d3ee; --accent2: #60a5fa;
-      --green: #22c55e; --amber: #f59e0b; --red: #f43f5e;
-    }
-    * { box-sizing: border-box; }
-    html { scroll-behavior: smooth; }
-    body {
-      margin: 0; font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      color: var(--text);
-      background:
-        radial-gradient(1200px 800px at 15% -10%, #0d1a33, transparent 50%),
-        radial-gradient(1000px 600px at 85% -20%, #0a1b2e, transparent 50%),
-        linear-gradient(180deg, var(--bg), var(--bg2));
-    }
-    .container { max-width: 1000px; margin: 0 auto; padding: 24px; }
-    .nav { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid rgba(148,163,184,.15); }
-    .brand { font-weight: 800; letter-spacing: .2px; display: flex; align-items: center; gap: 8px; }
-    .brand .text { background: linear-gradient(90deg, var(--accent), var(--accent2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
-    .brand .emoji { font-size: 22px; }
-    .hero { padding: 56px 0 40px; display: grid; gap: 20px; }
-    .kicker { font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: .12em; }
-    .title { font-size: clamp(28px, 5vw, 44px); line-height: 1.1; margin: 0; }
-    .subtitle { color: var(--muted); font-size: clamp(15px, 2.5vw, 18px); margin: 8px 0 0; max-width: 60ch; }
-    .cta { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 18px; }
-    .btn {
-      appearance: none; border: 1px solid transparent; cursor: pointer; padding: 12px 16px; border-radius: 10px;
-      font-weight: 600; letter-spacing: .2px; transition: transform .04s ease, opacity .2s ease, box-shadow .2s ease, border-color .2s ease;
-    }
-    .btn:active { transform: translateY(1px); }
-    .btn:focus-visible { outline: 3px solid #93c5fd; outline-offset: 2px; }
-    .btn-primary {
-      background: linear-gradient(135deg, var(--accent), var(--accent2));
-      color: #071427; box-shadow: 0 8px 24px rgba(14,165,233,.25);
-    }
-    .btn-ghost { background: rgba(148,163,184,.12); color: var(--text); border-color: rgba(148,163,184,.25); }
-    .btn:hover { border-color: rgba(96,165,250,.55); box-shadow: 0 10px 26px rgba(2,132,199,.18); }
-    .grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); margin-top: 32px; }
-    .card { background: rgba(15, 23, 42, .7); border: 1px solid rgba(148,163,184,.15); border-radius: 14px; padding: 18px; transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease; }
-    .card:hover { transform: translateY(-2px); border-color: rgba(96,165,250,.55); box-shadow: 0 12px 30px rgba(2,132,199,.18); }
-    .feat { display: flex; gap: 12px; align-items: flex-start; }
-    .feat .emoji { font-size: 24px; line-height: 1; }
-    .analyzer { margin-top: 32px; }
-    .field { display:flex; gap:10px; flex-wrap:wrap; }
-    .input {
-      flex: 1 1 480px; min-width: 240px;
-      background: rgba(148,163,184,.12); color: var(--text); border: 1px solid rgba(148,163,184,.25);
-      border-radius: 10px; padding: 12px 14px; font-size: 16px;
-    }
-    .result { margin-top: 16px; }
-    .badge { display:inline-block; padding:4px 10px; border-radius:999px; font-size:12px; font-weight:800; letter-spacing:.03em; }
-    .safe { background:#16a34a20; color:#22c55e; border:1px solid #16a34a55; }
-    .suspicious { background:#f59e0b20; color:#f59e0b; border:1px solid #f59e0b55; }
-    .danger { background:#ef444420; color:#f43f5e; border:1px solid #f43f5e55; }
-    .muted { color: var(--muted); }
-    ul.tight { margin: 8px 0 0; padding-left: 18px; }
-    .small { color: var(--muted); font-size: 14px; }
-    footer { border-top: 1px solid rgba(148,163,184,.15); margin-top: 40px; padding: 18px 0; }
-    code { background: rgba(148,163,184,.12); padding: 2px 6px; border-radius: 6px; }
-    @media (max-width: 520px) { .cta .btn { width: 100%; } }
-    @media (prefers-color-scheme: light) {
-      :root { --text: #0f172a; --muted: #475569; --card: #f8fafc; }
-      body { background: #f4f8ff; }
-      .card { background: #fff; border-color: rgba(2,6,23,.08); }
-      .btn-ghost { background: #fff; }
-      .input { background: #fff; }
-    }
-  </style>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>PhishGuardian</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:Inter;background:#0b1220;color:#e5e7eb}
+.container{max-width:1000px;margin:auto;padding:24px}
+.card{background:#0f172a;border-radius:14px;padding:18px;margin-top:20px}
+.input{width:100%;padding:12px;border-radius:10px;border:1px solid #334155;background:#020617;color:#fff}
+.btn{padding:12px 16px;border-radius:10px;border:none;font-weight:600;cursor:pointer}
+.btn-primary{background:#22d3ee;color:#071427}
+.badge{padding:4px 10px;border-radius:999px;font-size:12px;font-weight:800}
+.safe{background:#14532d;color:#22c55e}
+.suspicious{background:#78350f;color:#f59e0b}
+.danger{background:#7f1d1d;color:#f43f5e}
+.muted{color:#94a3b8}
+</style>
 </head>
+
 <body>
-  <div class="container">
-    <nav class="nav">
-      <div class="brand">
-        <div class="text">PhishGuardian</div>
-        <span class="emoji" aria-hidden="true">🐟</span>
-      </div>
-      <div class="small">v2.0 — Live backend connected (Render)</div>
-    </nav>
+<div class="container">
+  <h1>PhishGuardian 🛡️</h1>
+  <p class="muted">Client-side phishing detection with live backend validation</p>
 
-    <section class="hero">
-      <div class="kicker">Cyber safety • For Everyone</div>
-      <h1 class="title">Catch the bait before it catches you.</h1>
-      <p class="subtitle">
-        PhishGuardian helps you spot risky links and scam messages—fast, simple, and explainable.
-        This is our early build; analysis runs locally with live backend validation.
-      </p>
-      <div class="cta">
-  <a class="btn btn-primary" href="#analyzer">Try Analyzer</a>
+  <div class="card">
+    <form id="scanForm">
+      <input id="urlInput" class="input" placeholder="Paste a URL to scan"/>
+      <br><br>
+      <button class="btn btn-primary">Scan</button>
+    </form>
 
-  <a
-    class="btn btn-ghost"
-    target="_blank"
-    rel="noopener"
-    href="https://mail.google.com/mail/?view=cm&fs=1&to=yuvraj.patel@mitwpu.edu.in&su=PhishGuardian%20Contact"
-  >
-    Contact
-  </a>
-
-  <a class="btn btn-ghost" href="#features">Learn more</a>
-</div>
-    </section>
-
-    <!-- Analyzer -->
-    <section id="analyzer" class="analyzer card">
-      <div class="kicker">URL ANALYZER (CLIENT + BACKEND)</div>
-      <p class="small">All analysis happens in your browser. We don’t send URLs anywhere.</p>
-      <form id="scanForm" class="field" autocomplete="off">
-        <input id="urlInput" class="input" type="text" placeholder="Paste a URL (e.g., https://secure-login-paypai.ru)" />
-        <button class="btn btn-primary" type="submit">Scan</button>
-      </form>
-      <div id="result" class="result" style="display:none">
-        <div><span id="verdictBadge" class="badge"></span> <span class="muted">Score: <span id="scoreVal">0</span></span></div>
-        <div class="small muted" id="normalizedLine" style="margin-top:6px"></div>
-        <div id="reasonsWrap" style="margin-top:10px"></div>
-      </div>
-    </section>
-
-    <!-- Features -->
-    <section id="features">
-      <div class="grid">
-        <div class="card feat"><div class="emoji">🎣</div><div><div class="fw">Real phishing signals</div><div class="small">TLDs, raw IPs, typosquats, user@ tricks, punycode, brand abuse.</div></div></div>
-        <div class="card feat"><div class="emoji">🛡️</div><div><div class="fw">Explainable results</div><div class="small">Shows exactly why a URL is flagged.</div></div></div>
-        <div class="card feat"><div class="emoji">⚡</div><div><div class="fw">Fast & lightweight</div><div class="small">No servers, no data collection.</div></div></div>
-        <div class="card feat"><div class="emoji">🤖</div><div><div class="fw">Roadmap</div><div class="small">Phase 3 adds VirusTotal & OpenPhish intelligence.</div></div></div>
-      </div>
-    </section>
-
-    <!-- Status -->
-    <section id="status" class="card" style="margin-top:24px">
-      <div class="kicker">Status</div>
-      <div><strong>Current phase:</strong> Phase 2 complete — Live Python backend (Render)</div>
-      <div class="small" style="margin-top:6px">
-        Version: <code>v2.0</code> • Frontend + Live Backend • Explainable analysis
-      </div>
-      <ul class="tight" style="margin-top:10px">
-        <li>Whitelist for official domains (microsoft.com, microsoftonline.com, hdfcbank.com, paypal.com)</li>
-        <li>Flags: suspicious TLDs, raw IPs, punycode, many subdomains, user@ trick, long URL</li>
-        <li>Brand typos + brand-abuse detection</li>
-        <li>Scoring: Safe (0–1), Suspicious (2–4), Dangerous (5+)</li>
-      </ul>
-    </section>
-
-    <!-- Upcoming -->
-    <section id="upcoming" class="card" style="margin-top:16px">
-      <div class="kicker">Upcoming</div>
-      <ul class="tight">
-        <li>Phase 3: VirusTotal & OpenPhish threat intelligence</li>
-        <li>Reputation-based phishing scoring</li>
-        <li>Advanced obfuscation & Unicode detection</li>
-        <li>Confidence score (0–100%)</li>
-      </ul>
-    </section>
-
-    <footer>
-      <div class="small">© 2025 PhishGuardian • Educational use only. Don’t paste sensitive data.</div>
-    </footer>
+    <div id="result" style="display:none;margin-top:16px">
+      <span id="verdictBadge" class="badge"></span>
+      <span class="muted"> Score: <span id="scoreVal"></span></span>
+      <p class="muted" id="normalizedLine"></p>
+      <div id="reasonsWrap"></div>
+    </div>
   </div>
+</div>
 
 <script>
-  // --- Phase 2: Backend analyzer (Flask) ---
-  // Backend base URL (local vs production)
+/* ================= BACKEND ================= */
 const BACKEND_URL =
   location.hostname === "localhost"
     ? "http://127.0.0.1:5000"
     : "https://phishguardian-backend.onrender.com";
 
-// Phase 2: Backend analyzer (Flask)
-async function analyzeWithBackend(url) {
-  try {
-    const response = await fetch(`${BACKEND_URL}/analyze`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ url })
+async function analyzeWithBackend(url){
+  try{
+    const r = await fetch(`${BACKEND_URL}/analyze`,{
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body:JSON.stringify({url})
     });
-    return await response.json();
-  } catch (err) {
-    console.error("Backend not reachable", err);
-    return null;
-  }
+    return await r.json();
+  }catch{return null}
 }
 
+/* ================= HEURISTICS ================= */
 
- // --- Heuristic keyword lists ---
-
-const SUSPICIOUS_TLDS = [
-  ".ru", ".cn", ".top", ".gq", ".tk", ".ml", ".cf",
-  ".zip", ".mov", ".click", ".xyz", ".info", ".support", ".site"
-];
-
-const PHISHY_KEYWORDS = [
-  "login", "verify", "verification", "update", "secure",
-  "account", "signin", "reset", "password",
-  "bank", "wallet", "payment", "billing",
-  "alert", "suspended", "locked", "unusual",
-  "bonus", "gift", "free", "reward", "claim",
-  "invoice", "refund", "support", "help"
-];
-
+/* 🔴 EXPANDED BRANDS */
 const BRAND_MISSPELLS = {
-  "paypal": "paypal",
-  "paypa1": "paypal",
-  "micros0ft": "microsoft",
-  "microsofft": "microsoft",
-  "goog1e": "google",
-  "faceb00k": "facebook",
-  "amaz0n": "amazon"
+  /* Big Tech */
+  "goog1e":"google","g00gle":"google","google-secure":"google",
+  "micros0ft":"microsoft","microsofft":"microsoft","office365-login":"microsoft",
+  "appleid-login":"apple","icloud-login":"apple",
+
+  /* Social */
+  "faceb00k":"facebook","fb-security":"facebook",
+  "instagrarn":"instagram","instagram-login":"instagram",
+  "whatsapp-secure":"whatsapp","whatsapp-support":"whatsapp",
+  "twltter":"twitter","x-login":"twitter",
+  "linkedin-secure":"linkedin",
+
+  /* Commerce */
+  "amaz0n":"amazon","amazon-refund":"amazon","amazon-pay":"amazon",
+  "flipkart-secure":"flipkart","meesho-login":"meesho",
+
+  /* Payments / Fintech */
+  "paypa1":"paypal","paypai":"paypal","paypal-login":"paypal",
+  "phonepe-login":"phonepe","gpay-secure":"gpay","paytm-login":"paytm",
+
+  /* Banks – India */
+  "hdfc-login":"hdfcbank","hdfc-secure":"hdfcbank",
+  "icici-login":"icicibank","sbi-login":"sbi",
+  "axis-login":"axisbank","kotak-login":"kotakbank",
+
+  /* Banks – Global */
+  "chase-login":"chase","citi-secure":"citi",
+  "hsbc-login":"hsbc","barclays-secure":"barclays",
+
+  /* Crypto */
+  "binance-login":"binance","coinbase-secure":"coinbase",
+  "metamask-login":"metamask","trustwallet-login":"trustwallet",
+
+  /* Govt India */
+  "uidai-login":"aadhaar","aadhaar-update":"aadhaar",
+  "digilocker-login":"digilocker","incometax-login":"incometax"
 };
 
+/* 🟢 EXPANDED WHITELIST */
 const WHITELIST_BASES = [
-  "google.com",
-  "microsoft.com",
-  "microsoftonline.com",
-  "github.com",
-  "paypal.com",
-  "amazon.com",
-  "amazon.in",
-  "chat.openai.com",
-  "hdfcbank.com"
+  /* Google */
+  "google.com","gmail.com","youtube.com",
+
+  /* Microsoft */
+  "microsoft.com","microsoftonline.com","office.com","outlook.com",
+
+  /* Apple */
+  "apple.com","icloud.com",
+
+  /* Social */
+  "facebook.com","instagram.com","whatsapp.com","linkedin.com","x.com","twitter.com",
+
+  /* Dev / SaaS */
+  "github.com","gitlab.com","bitbucket.org",
+  "openai.com","chat.openai.com",
+  "notion.so","slack.com","zoom.us",
+
+  /* Commerce */
+  "amazon.com","amazon.in","flipkart.com","meesho.com",
+
+  /* Payments */
+  "paypal.com","paytm.com","phonepe.com","googlepay.com",
+
+  /* Banks India */
+  "hdfcbank.com","icicibank.com","sbi.co.in","axisbank.com","kotak.com",
+
+  /* Banks Global */
+  "chase.com","citi.com","hsbc.com","barclays.co.uk",
+
+  /* Govt India */
+  "uidai.gov.in","digilocker.gov.in","incometax.gov.in","india.gov.in"
 ];
 
+/* Other rules */
+const SUSPICIOUS_TLDS = [".ru",".cn",".tk",".xyz",".top",".site",".click",".support"];
+const PHISHY_KEYWORDS = [
+  "login","verify","secure","account","reset","password",
+  "bank","payment","billing","refund","wallet",
+  "urgent","alert","suspended","action",
+  "bonus","reward","free","claim",
+  "support","official"
+];
 
-  function normalizeUrl(u){let s=(u||"").trim();if(!/^https?:\/\//i.test(s))s="http://"+s;return s;}
-  function getHost(u){try{return new URL(u).hostname.toLowerCase();}catch(e){return (u.replace(/^https?:\/\//i,"").split("/")[0]||"").toLowerCase();}}
-  function isIPv4(host){const p=host.split(".");if(p.length!==4)return false;return p.every(x=>/^\d{1,3}$/.test(x)&&+x>=0&&+x<=255);}
-  function isUnderDomain(host, base){return host===base || host.endsWith("."+base);}
+/* ================= LOGIC ================= */
+function normalizeUrl(u){if(!/^https?:\/\//i.test(u))u="http://"+u;return u}
+function hostOf(u){try{return new URL(u).hostname.toLowerCase()}catch{return""}}
+function isUnder(h,b){return h===b||h.endsWith("."+b)}
 
-  function analyzeUrlBasic(inputUrl){
-    const raw=inputUrl; const url=normalizeUrl(inputUrl); const host=getHost(url); const lower=url.toLowerCase();
-    const flags=[]; let score=0;
+function analyzeUrlBasic(input){
+  const url=normalizeUrl(input),host=hostOf(url),lower=url.toLowerCase();
+  let score=0,flags=[];
 
-    for(const base of WHITELIST_BASES){
-      if(isUnderDomain(host,base)){
-        return{raw,normalized:url,host,score:0,flags:[],verdict:"Safe",badgeClass:"safe"};
-      }
-    }
+  for(const b of WHITELIST_BASES)
+    if(isUnder(host,b))
+      return{url,host,score:0,flags:[],verdict:"Safe",badge:"safe"};
 
-    if(host.includes("xn--")){flags.push("Domain uses punycode.");score+=2;}
-    if(isIPv4(host)){flags.push("URL uses direct IP.");score+=2;}
-    for(const tld of SUSPICIOUS_TLDS){if(host.endsWith(tld)){flags.push(`Suspicious domain extension: ${tld}`);score+=2;break;}}
-    if(!isIPv4(host)&&(host.match(/\./g)||[]).length>=3){flags.push("Unusually many subdomains.");score+=1;}
-    if(/\/\/[^\/]*@/.test(url)){flags.push("Contains userinfo in URL.");score+=1;}
+  if(/\d+\.\d+\.\d+\.\d+/.test(host)){flags.push("Raw IP address");score+=2}
+  for(const t of SUSPICIOUS_TLDS)
+    if(host.endsWith(t)){flags.push("Suspicious TLD");score+=2}
 
-    const kwHits=PHISHY_KEYWORDS.filter(k=>lower.includes(k));
-    if(kwHits.length){flags.push("Contains common keywords: "+kwHits.join(", "));score+=1;}
+  const hits=PHISHY_KEYWORDS.filter(k=>lower.includes(k));
+  if(hits.length){flags.push("Phishing keywords detected");score+=1}
+  if(hits.length>=3){flags.push("Multiple phishing keywords");score+=2}
 
-    const typoHits=Object.entries(BRAND_MISSPELLS).filter(([t])=>lower.includes(t));
-    if(typoHits.length){flags.push("Possible typosquatting: "+typoHits.map(([t,b])=>`${t}→${b}`).join(", "));score+=2;}
+  for(const b in BRAND_MISSPELLS)
+    if(lower.includes(b)){flags.push("Brand impersonation");score+=2}
 
-    const BRAND_BASES={"hdfcbank":"hdfcbank.com","microsoft":"microsoftonline.com","paypal":"paypal.com"};
-    for(const [brand,base] of Object.entries(BRAND_BASES)){
-      if(host.includes(brand) && !isUnderDomain(host,base)){
-        flags.push(`Suspicious use of brand ${brand}`); score+=2;
-      }
-    }
+  let verdict="Safe",badge="safe";
+  if(score>=5){verdict="Dangerous";badge="danger"}
+  else if(score>=2){verdict="Suspicious";badge="suspicious"}
 
-    if(url.length>120){flags.push("Unusually long URL.");score+=1;}
-
-    let verdict="Safe",badgeClass="safe";
-    if(score>=5){verdict="Dangerous";badgeClass="danger";}
-    else if(score>=2){verdict="Suspicious";badgeClass="suspicious";}
-
-    return{raw,normalized:url,host,score,flags,verdict,badgeClass};
-  }
-
-  const form=document.getElementById("scanForm");
-  form.addEventListener("submit", async (e)=>{
-    e.preventDefault();
-    const val=document.getElementById("urlInput").value.trim(); 
-    if(!val) return;
-
-    // Phase 1 result
-const res = analyzeUrlBasic(val);
-
-// Phase 2 call
-const backendRes = await analyzeWithBackend(val);
-console.log("Backend result:", backendRes);
-
-document.getElementById("verdictBadge").textContent = res.verdict;
-document.getElementById("verdictBadge").className = "badge " + res.badgeClass;
-document.getElementById("scoreVal").textContent = res.score;
-document.getElementById("normalizedLine").textContent =
-  `URL: ${res.normalized}  •  Host: ${res.host}`;
-
-const reasonsWrap = document.getElementById("reasonsWrap");
-const ul = document.createElement("ul");
-ul.className = "tight";
-
-// Phase 1 flags
-if (res.flags.length) {
-  res.flags.forEach(f => {
-    const li = document.createElement("li");
-    li.textContent = f;
-    ul.appendChild(li);
-  });
-} else {
-  const li = document.createElement("li");
-  li.innerHTML = '<span class="small muted">No obvious red flags.</span>';
-  ul.appendChild(li);
+  return{url,host,score,flags,verdict,badge};
 }
 
-// Phase 2 backend message
-if (backendRes && backendRes.message) {
-  const li = document.createElement("li");
-  li.innerHTML = `<span class="small muted">Backend check: operational</span>`;
-  ul.appendChild(li);
-}
+/* ================= UI ================= */
+scanForm.addEventListener("submit",async e=>{
+  e.preventDefault();
+  const val=urlInput.value.trim(); if(!val)return;
 
-// Attach once (important)
-reasonsWrap.innerHTML = "";
-reasonsWrap.appendChild(ul);
+  const r=analyzeUrlBasic(val);
+  const b=await analyzeWithBackend(val);
 
-document.getElementById("result").style.display = "block";
+  verdictBadge.textContent=r.verdict;
+  verdictBadge.className="badge "+r.badge;
+  scoreVal.textContent=r.score;
+  normalizedLine.textContent=`URL: ${r.url} • Host: ${r.host}`;
 
-  });
+  const ul=document.createElement("ul");
+  r.flags.forEach(f=>{const li=document.createElement("li");li.textContent=f;ul.appendChild(li)});
+  if(!r.flags.length) ul.innerHTML="<li class='muted'>No obvious red flags</li>";
+  if(b) ul.innerHTML+="<li class='muted'>Live backend validation active</li>";
+
+  reasonsWrap.innerHTML="";
+  reasonsWrap.appendChild(ul);
+  result.style.display="block";
+});
 </script>
+</body>
 </html>
