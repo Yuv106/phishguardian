@@ -198,11 +198,56 @@ async function analyzeWithBackend(url) {
 }
 
 
-  // --- Simple client-side URL analyzer (v1.0 — Phase 1) ---
-  const SUSPICIOUS_TLDS = [".ru", ".cn", ".top", ".gq", ".tk", ".zip", ".mov"];
-  const PHISHY_KEYWORDS = ["login","verify","update","secure","bonus","gift","alert","support","invoice","reset","account","bank","wallet","prize","free"];
-  const BRAND_MISSPELLS = {"paypai":"paypal","micorsoft":"microsoft","amaz0n":"amazon","faceb00k":"facebook","g00gle":"google"};
-  const WHITELIST_BASES = ["hdfcbank.com","microsoft.com","microsoftonline.com","paypal.com"];
+  // --- Simple client-side URL analyzer (v2.0 — Phase 1 + stronger heuristics) ---
+
+const SUSPICIOUS_TLDS = [
+  ".ru", ".cn", ".top", ".gq", ".tk", ".zip", ".mov",
+  ".xyz", ".club", ".online", ".site", ".live",
+  ".icu", ".click", ".link", ".info", ".rest"
+];
+
+const PHISHY_KEYWORDS = [
+  // Account / Security
+  "login","signin","verify","verification","secure","security",
+  "reset","recover","unlock","locked","suspended","limited",
+  "authentication","2fa","otp","passcode",
+
+  // Finance / Billing
+  "invoice","payment","billing","refund","charge",
+  "transaction","balance","overdue","statement",
+
+  // Social engineering
+  "bonus","reward","gift","free","prize","winner",
+  "offer","promo","discount","claim","exclusive",
+
+  // Impersonation / Trust
+  "support","helpdesk","service","customer",
+  "admin","administrator","team","official",
+
+  // Urgency triggers
+  "urgent","immediate","action","now","today","expire","expires"
+];
+
+const BRAND_MISSPELLS = {
+  "paypal": "paypal",
+  "paypa1": "paypal",
+  "micros0ft": "microsoft",
+  "microsof": "microsoft",
+  "office365": "microsoft",
+  "amaz0n": "amazon",
+  "faceb00k": "facebook",
+  "instagrarn": "instagram",
+  "g00gle": "google",
+  "googie": "google",   // capital I trick
+  "whatsapp": "whatsapp",
+  "netflix": "netflix",
+  "appleid": "apple",
+  "icloud": "apple",
+  "hdfcbank": "hdfcbank",
+  "sbi": "sbi",
+  "icici": "icici"
+};
+
 
   function normalizeUrl(u){let s=(u||"").trim();if(!/^https?:\/\//i.test(s))s="http://"+s;return s;}
   function getHost(u){try{return new URL(u).hostname.toLowerCase();}catch(e){return (u.replace(/^https?:\/\//i,"").split("/")[0]||"").toLowerCase();}}
