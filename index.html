@@ -198,55 +198,43 @@ async function analyzeWithBackend(url) {
 }
 
 
-  // --- Simple client-side URL analyzer (v2.0 — Phase 1 + stronger heuristics) ---
+ // --- Heuristic keyword lists ---
 
 const SUSPICIOUS_TLDS = [
-  ".ru", ".cn", ".top", ".gq", ".tk", ".zip", ".mov",
-  ".xyz", ".club", ".online", ".site", ".live",
-  ".icu", ".click", ".link", ".info", ".rest"
+  ".ru", ".cn", ".top", ".gq", ".tk", ".ml", ".cf",
+  ".zip", ".mov", ".click", ".xyz", ".info", ".support", ".site"
 ];
 
 const PHISHY_KEYWORDS = [
-  // Account / Security
-  "login","signin","verify","verification","secure","security",
-  "reset","recover","unlock","locked","suspended","limited",
-  "authentication","2fa","otp","passcode",
-
-  // Finance / Billing
-  "invoice","payment","billing","refund","charge",
-  "transaction","balance","overdue","statement",
-
-  // Social engineering
-  "bonus","reward","gift","free","prize","winner",
-  "offer","promo","discount","claim","exclusive",
-
-  // Impersonation / Trust
-  "support","helpdesk","service","customer",
-  "admin","administrator","team","official",
-
-  // Urgency triggers
-  "urgent","immediate","action","now","today","expire","expires"
+  "login", "verify", "verification", "update", "secure",
+  "account", "signin", "reset", "password",
+  "bank", "wallet", "payment", "billing",
+  "alert", "suspended", "locked", "unusual",
+  "bonus", "gift", "free", "reward", "claim",
+  "invoice", "refund", "support", "help"
 ];
 
 const BRAND_MISSPELLS = {
   "paypal": "paypal",
   "paypa1": "paypal",
   "micros0ft": "microsoft",
-  "microsof": "microsoft",
-  "office365": "microsoft",
-  "amaz0n": "amazon",
+  "microsofft": "microsoft",
+  "goog1e": "google",
   "faceb00k": "facebook",
-  "instagrarn": "instagram",
-  "g00gle": "google",
-  "googie": "google",   // capital I trick
-  "whatsapp": "whatsapp",
-  "netflix": "netflix",
-  "appleid": "apple",
-  "icloud": "apple",
-  "hdfcbank": "hdfcbank",
-  "sbi": "sbi",
-  "icici": "icici"
+  "amaz0n": "amazon"
 };
+
+const WHITELIST_BASES = [
+  "google.com",
+  "microsoft.com",
+  "microsoftonline.com",
+  "github.com",
+  "paypal.com",
+  "amazon.com",
+  "amazon.in",
+  "chat.openai.com",
+  "hdfcbank.com"
+];
 
 
   function normalizeUrl(u){let s=(u||"").trim();if(!/^https?:\/\//i.test(s))s="http://"+s;return s;}
