@@ -3,6 +3,8 @@ from flask_cors import CORS
 import os
 import requests
 
+VT_API_KEY = os.environ.get("VT_API_KEY")
+
 app = Flask(__name__)
 CORS(app)
 
