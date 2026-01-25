@@ -10,80 +10,125 @@
 body{margin:0;font-family:Inter;background:#0b1220;color:#e5e7eb}
 .container{max-width:1000px;margin:auto;padding:24px}
 .card{background:#0f172a;border-radius:14px;padding:18px;margin-top:20px}
-.input{width:100%;padding:12px;border-radius:10px;border:1px solid #334155;background:#020617;color:#fff}
-.btn{padding:12px 16px;border-radius:10px;border:none;font-weight:600;cursor:pointer}
-.btn-primary{background:#22d3ee;color:#071427}
-.btn-ghost{background:#020617;color:#e5e7eb;border:1px solid #334155}
+.input{
+  width:100%;
+  padding:12px;
+  border-radius:12px;
+  border:1px solid #334155;
+  background:linear-gradient(180deg,#020617,#020617 60%,#01040d);
+  color:#fff;
+  font-size:15px;
+  transition:border-color .2s ease, box-shadow .2s ease;
+}
+
+.input:focus{
+  outline:none;
+  border-color:#22d3ee;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.05),
+    0 0 0 3px rgba(34,211,238,0.25),
+    0 0 18px rgba(34,211,238,0.35);
+}
+
+.btn{padding:12px 16px;border-radius:12px;border:none;font-weight:600;cursor:pointer}
+.btn-primary{
+  background: linear-gradient(135deg, #22d3ee, #60a5fa);
+  color:#071427;
+  box-shadow:
+    0 8px 24px rgba(34,211,238,0.35),
+    inset 0 1px 0 rgba(255,255,255,0.35);
+  transition: transform .05s ease, box-shadow .2s ease;
+}
+
+.btn-primary:hover{
+  box-shadow:
+    0 10px 30px rgba(34,211,238,0.55),
+    inset 0 1px 0 rgba(255,255,255,0.4);
+}
+
+.btn-primary:active{
+  transform: translateY(1px);
+}
+
+.btn-ghost{
+  background:#020617;
+  color:#e5e7eb;
+  border:1px solid #334155;
+  transition: box-shadow .2s ease, border-color .2s ease;
+}
+
+.btn-ghost:hover{
+  border-color:#22d3ee;
+  box-shadow:0 0 0 3px rgba(34,211,238,0.25);
+}
+
 .badge{padding:4px 10px;border-radius:999px;font-size:12px;font-weight:800}
 .safe{background:#14532d;color:#22c55e}
 .suspicious{background:#78350f;color:#f59e0b}
 .danger{background:#7f1d1d;color:#f43f5e}
 .muted{color:#94a3b8}
+
 .nav{display:flex;justify-content:space-between;align-items:center}
-.cta{display:flex;gap:12px;flex-wrap:wrap}
-ul{margin-top:8px}
+.nav .cta a{margin-left:10px;text-decoration:none}
+
+.scan-row{display:flex;gap:12px;margin-top:12px}
+@media(max-width:640px){.scan-row{flex-direction:column}}
 </style>
 </head>
 
 <body>
 <div class="container">
 
-  <!-- NAV -->
-  <div class="nav">
-    <h1>PhishGuardian 🛡️</h1>
-    <div class="cta">
-      <a class="btn btn-ghost" href="#analyzer">Try Analyzer</a>
-      <a class="btn btn-ghost" href="#status">Status</a>
-      <a class="btn btn-ghost"
-         target="_blank"
-         href="https://mail.google.com/mail/?view=cm&fs=1&to=yuvraj.patel@mitwpu.edu.in&su=PhishGuardian%20Contact">
-        Contact
-      </a>
-    </div>
+<!-- NAV -->
+<div class="nav">
+  <h1>PhishGuardian 🛡️</h1>
+  <div class="cta">
+    <a class="btn btn-ghost" href="#analyzer">Try Analyzer</a>
+    <a class="btn btn-ghost" href="#status">Status</a>
+    <a class="btn btn-ghost" target="_blank"
+      href="https://mail.google.com/mail/?view=cm&fs=1&to=yuvraj.patel@mitwpu.edu.in&su=PhishGuardian%20Contact">
+      Contact
+    </a>
   </div>
+</div>
 
-  <p class="muted">
-    Client-side phishing detection with live backend validation.
-  </p>
+<p class="muted">Client-side phishing detection with live backend validation.</p>
 
-  <!-- ANALYZER -->
-  <div id="analyzer" class="card">
-    <form id="scanForm">
-      <input id="urlInput" class="input" placeholder="Paste a URL to scan"/>
-      <br><br>
-      <button class="btn btn-primary">Scan</button>
-    </form>
+<!-- ANALYZER -->
+<form id="scanForm" class="scan-row">
+  <input id="urlInput" class="input" placeholder="Paste a URL to scan">
+  <button class="btn btn-primary">Scan</button>
+</form>
 
-    <div id="result" style="display:none;margin-top:16px">
-      <span id="verdictBadge" class="badge"></span>
-      <span class="muted">
-        Score: <span id="scoreVal"></span> •
-        Confidence: <strong><span id="confidenceVal"></span>%</strong>
-      </span>
-      <p class="muted" id="normalizedLine"></p>
-      <div id="reasonsWrap"></div>
-    </div>
-  </div>
+<div id="result" style="display:none;margin-top:16px">
+  <span id="verdictBadge" class="badge"></span>
+  <span class="muted">
+    Score: <span id="scoreVal"></span> •
+    Confidence: <strong><span id="confidenceVal"></span>%</strong>
+  </span>
+  <p class="muted" id="normalizedLine"></p>
+  <div id="reasonsWrap"></div>
+</div>
 
-  <!-- STATUS -->
-  <div id="status" class="card">
-    <h3>Current Status</h3>
-    <ul>
-      <li><strong>Phase 2:</strong> Live Python backend deployed (Render) ✅</li>
-      <li>Explainable flags + confidence scoring</li>
-    </ul>
-  </div>
+<!-- STATUS -->
+<div id="status" class="card">
+  <h3>Current Status</h3>
+  <ul>
+    <li><strong>Phase 2:</strong> Live Python backend deployed (Render) ✅</li>
+    <li>Explainable flags + confidence scoring</li>
+  </ul>
+</div>
 
-  <!-- UPCOMING -->
-  <div class="card">
-    <h3>Upcoming (Phase 3)</h3>
-    <ul>
-      <li>VirusTotal & OpenPhish intelligence</li>
-      <li>Reputation-based confidence boost</li>
-      <li>Unicode & homograph attack detection</li>
-      <li>ML-assisted risk calibration</li>
-    </ul>
-  </div>
+<!-- UPCOMING -->
+<div class="card">
+  <h3>Upcoming (Phase 3)</h3>
+  <ul>
+    <li>VirusTotal & OpenPhish intelligence</li>
+    <li>Reputation-based confidence boost</li>
+    <li>Unicode & homograph attack detection</li>
+    <li>ML-assisted risk calibration</li>
+  </ul>
+</div>
 
 </div>
 
@@ -105,72 +150,93 @@ async function analyzeWithBackend(url){
   }catch{return null}
 }
 
-/* ================= CONFIDENCE ================= */
-function calculateConfidence(score){
-  if(score <= 1) return 15 + score * 10;
-  if(score <= 3) return 40 + score * 8;
-  if(score <= 5) return 70 + score * 5;
-  return 95;
-}
+/* ================= HEURISTICS ================= */
 
-/* ================= BRANDS ================= */
+const SUSPICIOUS_TLDS = [
+  ".ru",".cn",".tk",".xyz",".top",".site",".click",".support",".gq",".ml",".cf"
+];
+
+const PHISHY_KEYWORDS = [
+  "login","verify","secure","account","signin","reset","password",
+  "bank","payment","billing","invoice","refund","wallet",
+  "urgent","alert","suspended","locked","action",
+  "bonus","reward","free","claim",
+  "support","official","update","confirm"
+];
+
+/* ===== BRAND IMPERSONATION (EXPANDED) ===== */
 const BRAND_MISSPELLS = {
-  /* Global banks */
-  "jpmorgan":"jpmorganchase","wellsfargo":"wellsfargo","hsbc-login":"hsbc",
-  "barclays-login":"barclays","bankofamerica":"bankofamerica",
+  /* Global Banks */
+  "chase-login":"chase","citi-login":"citi","hsbc-login":"hsbc",
+  "barclays-login":"barclays","wellsfargo-login":"wellsfargo",
+  "bankofamerica-login":"bankofamerica","deutschebank-login":"deutschebank",
 
-  /* Indian banks */
+  /* Indian Banks */
   "hdfc-login":"hdfcbank","icici-login":"icicibank","sbi-login":"sbi",
-  "axis-login":"axisbank","kotak-login":"kotakbank",
+  "axis-login":"axisbank","kotak-login":"kotakbank","pnb-login":"pnb",
+  "yesbank-login":"yesbank","bob-login":"bankofbaroda",
 
   /* Payments */
   "paypal-login":"paypal","paypa1":"paypal","stripe-login":"stripe",
   "paytm-login":"paytm","phonepe-login":"phonepe","gpay-login":"googlepay",
 
-  /* E-commerce */
-  "amazon-login":"amazon","amaz0n":"amazon","ebay-login":"ebay",
-  "temu-login":"temu","aliexpress-login":"aliexpress","flipkart-login":"flipkart",
-
   /* Crypto */
-  "binance-login":"binance","coinbase-login":"coinbase","kraken-login":"kraken",
-  "metamask-login":"metamask","trustwallet-login":"trustwallet",
+  "binance-login":"binance","coinbase-login":"coinbase",
+  "kraken-login":"kraken","metamask-login":"metamask",
+  "trustwallet-login":"trustwallet","phantom-wallet":"phantom",
 
-  /* SaaS */
-  "google-login":"google","microsoft-login":"microsoft","appleid-login":"apple",
-  "github-login":"github","slack-login":"slack","zoom-login":"zoom"
+  /* SaaS / Big Tech */
+  "google-login":"google","microsoft-login":"microsoft",
+  "appleid-login":"apple","github-login":"github",
+  "slack-login":"slack","zoom-login":"zoom",
+
+  /* E-commerce */
+  "amazon-login":"amazon","amaz0n":"amazon","flipkart-login":"flipkart",
+  "ebay-login":"ebay","aliexpress-login":"aliexpress","temu-login":"temu"
 };
 
-/* ================= WHITELIST ================= */
+/* ===== WHITELIST BASE DOMAINS ===== */
 const WHITELIST_BASES = [
   /* Banks */
-  "jpmorganchase.com","bankofamerica.com","wellsfargo.com","hsbc.com",
+  "chase.com","citi.com","hsbc.com","barclays.co.uk","wellsfargo.com",
+  "bankofamerica.com","deutsche-bank.com",
   "hdfcbank.com","icicibank.com","sbi.co.in","axisbank.com","kotak.com",
+  "pnbindia.in","yesbank.in","bankofbaroda.in",
 
   /* Payments */
   "paypal.com","stripe.com","paytm.com","phonepe.com","googlepay.com",
 
-  /* E-commerce */
-  "amazon.com","amazon.in","ebay.com","temu.com","aliexpress.com","flipkart.com",
-
   /* Crypto */
-  "binance.com","coinbase.com","kraken.com","metamask.io","trustwallet.com",
+  "binance.com","coinbase.com","kraken.com","metamask.io","trustwallet.com","phantom.app",
 
-  /* SaaS / Big tech */
+  /* SaaS */
   "google.com","accounts.google.com","microsoft.com","apple.com",
-  "github.com","slack.com","zoom.us"
+  "github.com","slack.com","zoom.us",
+
+  /* E-commerce */
+  "amazon.com","amazon.in","flipkart.com","ebay.com","aliexpress.com","temu.com"
 ];
 
-const SUSPICIOUS_TLDS=[".ru",".cn",".tk",".xyz",".top",".site",".click",".support"];
-const PHISHY_KEYWORDS=[
-  "login","verify","secure","account","reset","password","bank","payment",
-  "wallet","urgent","alert","suspended","bonus","reward","claim","support"
-];
-
-/* ================= LOGIC ================= */
+/* ================= HELPERS ================= */
 function normalizeUrl(u){if(!/^https?:\/\//i.test(u))u="http://"+u;return u}
 function hostOf(u){try{return new URL(u).hostname.toLowerCase()}catch{return""}}
 function isUnder(h,b){return h===b||h.endsWith("."+b)}
 
+/* ================= CONFIDENCE LOGIC ================= */
+function calculateConfidence(result, backendAlive){
+  let c = 0;
+  if(result.score===0 && result.flags.length===0) c+=40;
+  if(result.flags.some(f=>f.includes("Brand"))) c+=25;
+  if(result.flags.some(f=>f.includes("Raw IP"))) c+=20;
+  if(result.flags.some(f=>f.includes("Suspicious TLD"))) c+=15;
+  if(result.flags.length>=3) c+=15;
+  if(result.score>=5) c+=20;
+  else if(result.score>=2) c+=10;
+  if(backendAlive) c+=10;
+  return Math.min(100,Math.max(5,c));
+}
+
+/* ================= ANALYSIS ================= */
 function analyzeUrlBasic(input){
   const url=normalizeUrl(input),host=hostOf(url),lower=url.toLowerCase();
   let score=0,flags=[];
@@ -188,7 +254,7 @@ function analyzeUrlBasic(input){
   if(hits.length>=3){flags.push("Multiple phishing keywords");score+=2}
 
   for(const b in BRAND_MISSPELLS)
-    if(lower.includes(b)){flags.push("Brand impersonation");score+=2}
+    if(lower.includes(b)){flags.push("Brand impersonation detected");score+=2}
 
   let verdict="Safe",badge="safe";
   if(score>=5){verdict="Dangerous";badge="danger"}
@@ -208,7 +274,7 @@ scanForm.addEventListener("submit",async e=>{
   verdictBadge.textContent=r.verdict;
   verdictBadge.className="badge "+r.badge;
   scoreVal.textContent=r.score;
-  confidenceVal.textContent=calculateConfidence(r.score);
+  confidenceVal.textContent=calculateConfidence(r,!!b);
   normalizedLine.textContent=`URL: ${r.url} • Host: ${r.host}`;
 
   const ul=document.createElement("ul");
