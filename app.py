@@ -6,20 +6,18 @@ import time
 
 # ================= CONFIG =================
 VT_API_KEY = os.environ.get("VT_API_KEY")
+VT_BASE = "https://www.virustotal.com/api/v3"
 
 app = Flask(__name__)
 CORS(app)
 
-# ================= HEALTH CHECK =================
+# ================= HEALTH =================
 @app.route("/", methods=["GET"])
 def home():
     return "PhishGuardian backend is alive 🟢"
 
-# ================= VIRUSTOTAL CORE =================
-def scan_with_virustotal(url):
-    """
-    Submits a URL to VirusTotal and returns engine statistics.
-    """
+# ================= VT SCAN =================
+def scan_with_virustotal(url: str):
     if not VT_API_KEY:
         return {"error": "VT_API_KEY not configured"}
 
@@ -27,39 +25,36 @@ def scan_with_virustotal(url):
         "x-apikey": VT_API_KEY
     }
 
-    # 1️⃣ Submit URL to VirusTotal
-    submit_response = requests.post(
-        "https://www.virustotal.com/api/v3/urls",
+    # 1️⃣ Submit URL
+    submit = requests.post(
+        f"{VT_BASE}/urls",
         headers=headers,
         data={"url": url},
         timeout=15
     )
 
-    if submit_response.status_code != 200:
+    if submit.status_code != 200:
         return {"error": "VirusTotal submit failed"}
 
-    analysis_id = submit_response.json()["data"]["id"]
+    analysis_id = submit.json()["data"]["id"]
 
-    # 2️⃣ Wait briefly for analysis to complete
+    # 2️⃣ Wait briefly (VT is async)
     time.sleep(3)
 
-    # 3️⃣ Fetch analysis results
-    analysis_response = requests.get(
-        f"https://www.virustotal.com/api/v3/analyses/{analysis_id}",
+    # 3️⃣ Fetch analysis result
+    analysis = requests.get(
+        f"{VT_BASE}/analyses/{analysis_id}",
         headers=headers,
         timeout=15
     )
 
-    if analysis_response.status_code != 200:
+    if analysis.status_code != 200:
         return {"error": "VirusTotal analysis fetch failed"}
 
-    stats = (
-        analysis_response
-        .json()
-        .get("data", {})
-        .get("attributes", {})
+    stats = analysis.json() \
+        .get("data", {}) \
+        .get("attributes", {}) \
         .get("stats", {})
-    )
 
     return {
         "malicious": stats.get("malicious", 0),
@@ -68,58 +63,64 @@ def scan_with_virustotal(url):
         "undetected": stats.get("undetected", 0)
     }
 
-# ================= VT INTERPRETATION (NEW) =================
-def vt_verdict(stats):
+# ================= VT VERDICT =================
+def vt_verdict_and_confidence(vt):
     """
-    Converts VirusTotal stats into a verdict + confidence.
+    VirusTotal OVERRIDES everything.
+    This mirrors real security products.
     """
-    if not stats or "error" in stats:
+
+    if not vt or "error" in vt:
         return {
-            "verdict": "unknown",
-            "confidence": 0
+            "verdict": "Unknown",
+            "confidence": 0,
+            "reason": "VirusTotal unavailable"
         }
 
-    malicious = stats.get("malicious", 0)
-    suspicious = stats.get("suspicious", 0)
+    malicious = vt.get("malicious", 0)
+    suspicious = vt.get("suspicious", 0)
 
-    # Strong malicious signal
-    if malicious >= 3:
+    if malicious > 0:
         return {
-            "verdict": "dangerous",
-            "confidence": 95
+            "verdict": "Dangerous",
+            "confidence": min(98, 90 + malicious * 2),
+            "reason": f"Detected by {malicious} security engines"
         }
 
-    # Medium signal
-    if malicious >= 1 or suspicious >= 2:
+    if suspicious > 0:
         return {
-            "verdict": "suspicious",
-            "confidence": 75
+            "verdict": "Suspicious",
+            "confidence": min(90, 70 + suspicious * 4),
+            "reason": f"Flagged suspicious by {suspicious} engines"
         }
 
-    # Clean but never 100%
     return {
-        "verdict": "clean",
-        "confidence": 40
+        "verdict": "Safe",
+        "confidence": 55,
+        "reason": "No engines flagged this URL"
     }
 
-# ================= MAIN ANALYZE API =================
+# ================= ANALYZE =================
 @app.route("/analyze", methods=["POST"])
 def analyze():
-    data = request.get_json()
-    url = data.get("url", "")
+    data = request.get_json(force=True)
+    url = data.get("url", "").strip()
 
-    vt_stats = scan_with_virustotal(url)
-    vt_result = vt_verdict(vt_stats)
+    if not url:
+        return jsonify({"error": "URL missing"}), 400
+
+    vt_result = scan_with_virustotal(url)
+    vt_final = vt_verdict_and_confidence(vt_result)
 
     return jsonify({
         "url": url,
         "backend": "alive",
-        "virustotal": vt_stats,
-        "vt_verdict": vt_result["verdict"],
-        "vt_confidence": vt_result["confidence"]
+        "engine": "VirusTotal",
+        "virustotal": vt_result,
+        "final_verdict": vt_final
     })
 
-# ================= ENTRY POINT =================
+# ================= RUN =================
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
