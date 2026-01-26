@@ -5,6 +5,7 @@ import requests
 import time
 
 # ================= CONFIG =================
+
 VT_API_KEY = os.environ.get("VT_API_KEY")
 VT_BASE = "https://www.virustotal.com/api/v3"
 
@@ -12,18 +13,18 @@ app = Flask(__name__)
 CORS(app)
 
 # ================= HEALTH =================
+
 @app.route("/", methods=["GET"])
 def home():
     return "PhishGuardian backend is alive 🟢"
 
-# ================= VT SCAN =================
-def scan_with_virustotal(url: str):
+# ================= VIRUSTOTAL =================
+
+def scan_with_virustotal(url):
     if not VT_API_KEY:
         return {"error": "VT_API_KEY not configured"}
 
-    headers = {
-        "x-apikey": VT_API_KEY
-    }
+    headers = {"x-apikey": VT_API_KEY}
 
     # 1️⃣ Submit URL
     submit = requests.post(
@@ -38,23 +39,25 @@ def scan_with_virustotal(url: str):
 
     analysis_id = submit.json()["data"]["id"]
 
-    # 2️⃣ Wait briefly (VT is async)
+    # 2️⃣ Wait briefly (VT async)
     time.sleep(3)
 
-    # 3️⃣ Fetch analysis result
-    analysis = requests.get(
+    # 3️⃣ Fetch results
+    report = requests.get(
         f"{VT_BASE}/analyses/{analysis_id}",
         headers=headers,
         timeout=15
     )
 
-    if analysis.status_code != 200:
-        return {"error": "VirusTotal analysis fetch failed"}
+    if report.status_code != 200:
+        return {"error": "VirusTotal fetch failed"}
 
-    stats = analysis.json() \
-        .get("data", {}) \
-        .get("attributes", {}) \
+    stats = (
+        report.json()
+        .get("data", {})
+        .get("attributes", {})
         .get("stats", {})
+    )
 
     return {
         "malicious": stats.get("malicious", 0),
@@ -63,64 +66,96 @@ def scan_with_virustotal(url: str):
         "undetected": stats.get("undetected", 0)
     }
 
-# ================= VT VERDICT =================
-def vt_verdict_and_confidence(vt):
+# ================= VERDICT LOGIC =================
+
+def interpret_vt(stats):
     """
-    VirusTotal OVERRIDES everything.
-    This mirrors real security products.
+    Convert raw VT numbers into a risk level
     """
+    if not stats:
+        return "unknown"
 
-    if not vt or "error" in vt:
-        return {
-            "verdict": "Unknown",
-            "confidence": 0,
-            "reason": "VirusTotal unavailable"
-        }
+    mal = stats.get("malicious", 0)
+    susp = stats.get("suspicious", 0)
 
-    malicious = vt.get("malicious", 0)
-    suspicious = vt.get("suspicious", 0)
+    if mal >= 3:
+        return "high"
+    if mal >= 1 or susp >= 2:
+        return "medium"
+    if mal == 0 and susp == 0:
+        return "unknown"
 
-    if malicious > 0:
-        return {
-            "verdict": "Dangerous",
-            "confidence": min(98, 90 + malicious * 2),
-            "reason": f"Detected by {malicious} security engines"
-        }
+    return "low"
 
-    if suspicious > 0:
-        return {
-            "verdict": "Suspicious",
-            "confidence": min(90, 70 + suspicious * 4),
-            "reason": f"Flagged suspicious by {suspicious} engines"
-        }
+def compute_confidence(heuristic_score, vt_stats):
+    """
+    Confidence = weighted blend (heuristics + VT)
+    """
+    mal = vt_stats.get("malicious", 0)
+    susp = vt_stats.get("suspicious", 0)
+
+    confidence = (
+        heuristic_score * 12 +
+        mal * 20 +
+        susp * 10
+    )
+
+    # Clamp to sane range
+    return max(15, min(95, confidence))
+
+def final_verdict(heuristic_score, vt_stats):
+    vt_level = interpret_vt(vt_stats)
+
+    if vt_level == "high":
+        verdict = "Dangerous"
+        reason = "Detected by multiple security engines"
+    elif vt_level == "medium":
+        verdict = "Suspicious"
+        reason = "Flagged by security engines"
+    elif vt_level == "unknown" and heuristic_score >= 6:
+        verdict = "Dangerous"
+        reason = "Strong phishing indicators with unknown reputation"
+    elif vt_level == "unknown" and heuristic_score >= 3:
+        verdict = "Suspicious"
+        reason = "Phishing indicators detected"
+    else:
+        verdict = "Safe"
+        reason = "No strong indicators detected"
+
+    confidence = compute_confidence(heuristic_score, vt_stats)
 
     return {
-        "verdict": "Safe",
-        "confidence": 55,
-        "reason": "No engines flagged this URL"
+        "verdict": verdict,
+        "confidence": confidence,
+        "reason": reason
     }
 
 # ================= ANALYZE =================
+
 @app.route("/analyze", methods=["POST"])
 def analyze():
-    data = request.get_json(force=True)
+    data = request.get_json() or {}
     url = data.get("url", "").strip()
 
-    if not url:
-        return jsonify({"error": "URL missing"}), 400
+    # ⛳ TEMP heuristic score
+    # (Frontend already computes real one; this keeps backend compatible)
+    heuristic_score = data.get("heuristic_score", 1)
 
-    vt_result = scan_with_virustotal(url)
-    vt_final = vt_verdict_and_confidence(vt_result)
+    vt_stats = scan_with_virustotal(url)
+    vt_stats = vt_stats if isinstance(vt_stats, dict) else {}
+
+    final = final_verdict(heuristic_score, vt_stats)
 
     return jsonify({
-        "url": url,
         "backend": "alive",
         "engine": "VirusTotal",
-        "virustotal": vt_result,
-        "final_verdict": vt_final
+        "url": url,
+        "virustotal": vt_stats,
+        "final_verdict": final
     })
 
 # ================= RUN =================
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
