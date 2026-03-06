@@ -264,10 +264,10 @@ function analyzeUrlBasic(input){
 }
 
 /* ================= UI ================= */
-scanForm.addEventListener("submit",async e=>{
+document.getElementById("scanForm").addEventListener("submit", async e=>{
   e.preventDefault();
 
-  const val = urlInput.value.trim();
+  const val = normalizeUrl(urlInput.value.trim());
   if(!val) return;
 
   const backend = await analyzeWithBackend(val);
