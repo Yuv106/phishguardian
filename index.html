@@ -289,7 +289,7 @@ scanForm.addEventListener("submit",async e=>{
   else if(verdict === "Suspicious") verdictBadge.className += "suspicious";
   else verdictBadge.className += "danger";
 
-  scoreVal.textContent = backend.heuristic_score;
+  scoreVal.textContent = backend.final_verdict.risk_score;
   confidenceVal.textContent = confidence;
 
   normalizedLine.textContent = `URL: ${val} • Host: ${host}`;
