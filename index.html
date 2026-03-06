@@ -266,26 +266,48 @@ function analyzeUrlBasic(input){
 /* ================= UI ================= */
 scanForm.addEventListener("submit",async e=>{
   e.preventDefault();
-  const val=urlInput.value.trim(); if(!val)return;
 
-  const r=analyzeUrlBasic(val);
-  const b=await analyzeWithBackend(val);
+  const val = urlInput.value.trim();
+  if(!val) return;
 
-  verdictBadge.textContent=r.verdict;
-  verdictBadge.className="badge "+r.badge;
-  scoreVal.textContent=r.score;
-  confidenceVal.textContent=calculateConfidence(r,!!b);
-  normalizedLine.textContent=`URL: ${r.url} • Host: ${r.host}`;
+  const backend = await analyzeWithBackend(val);
 
-  const ul=document.createElement("ul");
-  r.flags.forEach(f=>{const li=document.createElement("li");li.textContent=f;ul.appendChild(li)});
-  if(!r.flags.length) ul.innerHTML="<li class='muted'>No obvious red flags</li>";
-  if(b) ul.innerHTML+="<li class='muted'>Live backend validation active</li>";
+  if(!backend){
+    alert("Backend not reachable");
+    return;
+  }
 
-  reasonsWrap.innerHTML="";
+  const verdict = backend.final_verdict.verdict;
+  const confidence = backend.final_verdict.confidence;
+  const reasons = backend.final_verdict.reasons;
+  const host = new URL(val).hostname;
+
+  verdictBadge.textContent = verdict;
+
+  verdictBadge.className = "badge ";
+  if(verdict === "Safe") verdictBadge.className += "safe";
+  else if(verdict === "Suspicious") verdictBadge.className += "suspicious";
+  else verdictBadge.className += "danger";
+
+  scoreVal.textContent = backend.heuristic_score;
+  confidenceVal.textContent = confidence;
+
+  normalizedLine.textContent = `URL: ${val} • Host: ${host}`;
+
+  const ul = document.createElement("ul");
+
+  reasons.forEach(r=>{
+    const li = document.createElement("li");
+    li.textContent = r;
+    ul.appendChild(li);
+  });
+
+  reasonsWrap.innerHTML = "";
   reasonsWrap.appendChild(ul);
-  result.style.display="block";
+
+  result.style.display = "block";
 });
+
 </script>
 
 <footer class="muted" style="margin-top:40px;text-align:center;font-size:13px;">
