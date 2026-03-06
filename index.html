@@ -73,6 +73,32 @@ body{margin:0;font-family:Inter;background:#0b1220;color:#e5e7eb}
 
 .scan-row{display:flex;gap:12px;margin-top:12px}
 @media(max-width:640px){.scan-row{flex-direction:column}}
+
+.spinner{
+  width:18px;
+  height:18px;
+  border:3px solid rgba(255,255,255,0.2);
+  border-top:3px solid #22d3ee;
+  border-radius:50%;
+  animation:spin 0.8s linear infinite;
+  display:inline-block;
+  vertical-align:middle;
+}
+
+@keyframes spin{
+  from{transform:rotate(0deg)}
+  to{transform:rotate(360deg)}
+}
+
+.loading{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin-top:10px;
+  color:#94a3b8;
+  font-size:14px;
+}
+
 </style>
 </head>
 
@@ -97,8 +123,13 @@ body{margin:0;font-family:Inter;background:#0b1220;color:#e5e7eb}
 <!-- ANALYZER -->
 <form id="scanForm" class="scan-row">
   <input id="urlInput" class="input" placeholder="Paste a URL to scan">
-  <button class="btn btn-primary">Scan</button>
+  <button id="scanBtn" type="submit" class="btn btn-primary">Scan</button>
 </form>
+
+<div id="loading" class="loading" style="display:none">
+  <span class="spinner"></span>
+  Scanning URL...
+</div>
 
 <div id="result" style="display:none;margin-top:16px">
   <span id="verdictBadge" class="badge"></span>
@@ -133,6 +164,18 @@ body{margin:0;font-family:Inter;background:#0b1220;color:#e5e7eb}
 </div>
 
 <script>
+
+/* ================= DOM references ================= */
+const urlInput = document.getElementById("urlInput");
+const loading = document.getElementById("loading");
+const result = document.getElementById("result");
+const verdictBadge = document.getElementById("verdictBadge");
+const scoreVal = document.getElementById("scoreVal");
+const confidenceVal = document.getElementById("confidenceVal");
+const normalizedLine = document.getElementById("normalizedLine");
+const reasonsWrap = document.getElementById("reasonsWrap");
+const scanBtn = document.getElementById("scanBtn");
+
 /* ================= BACKEND ================= */
 const BACKEND_URL =
   location.hostname === "localhost"
@@ -264,13 +307,21 @@ function analyzeUrlBasic(input){
 }
 
 /* ================= UI ================= */
+
 document.getElementById("scanForm").addEventListener("submit", async e=>{
   e.preventDefault();
 
   const val = normalizeUrl(urlInput.value.trim());
   if(!val) return;
 
-  const backend = await analyzeWithBackend(val);
+  result.style.display = "none";
+  scanBtn.disabled = true;
+loading.style.display = "flex";
+
+const backend = await analyzeWithBackend(val);
+
+loading.style.display = "none";
+scanBtn.disabled = false;
 
   if(!backend){
     alert("Backend not reachable");
