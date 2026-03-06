@@ -4,7 +4,7 @@ Catch the bait before it catches you.
 
 PhishGuardian is a lightweight, explainable phishing URL analyzer built to help users quickly identify suspicious links using transparent security checks.
 
-Live demo (frontend):  
+Live demo :  
 https://yuv106.github.io/phishguardian/
 
 ---
