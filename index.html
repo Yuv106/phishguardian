@@ -331,7 +331,7 @@ scanBtn.disabled = false;
   const verdict = backend.final_verdict.verdict;
   const confidence = backend.final_verdict.confidence;
   const reasons = backend.final_verdict.reasons;
-  const host = new URL(val).hostname;
+  const host = hostOf(val);
 
   verdictBadge.textContent = verdict;
 
