@@ -271,9 +271,8 @@ normalizedLine.textContent = `URL: ${url} • Host: ${host}`;
 if(backend.domain_age_days !== undefined && backend.domain_age_days !== null){
 domainAgeLine.textContent = `Domain age: ${backend.domain_age_days} days`;
 }else{
-domainAgeLine.textContent = "";
+domainAgeLine.textContent = "Domain age: Unknown";
 }
-
 const ul = document.createElement("ul");
 
 reasons.forEach(r=>{
