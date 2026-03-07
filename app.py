@@ -2,7 +2,6 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 import os
 import requests
-import time
 import re
 import base64
 import math
@@ -37,7 +36,7 @@ BRAND_KEYWORDS = [
 ]
 
 # =============================
-# HEALTH
+# HEALTH CHECK
 # =============================
 
 @app.route("/", methods=["GET"])
@@ -50,10 +49,10 @@ def home():
 
 def calculate_entropy(domain):
 
-    domain = domain.split(".")[0]
+    if not domain:
+        return 0
 
     prob = [n/len(domain) for n in Counter(domain).values()]
-
     entropy = -sum(p * math.log2(p) for p in prob)
 
     return entropy
@@ -100,7 +99,7 @@ def check_google_safe(url):
             "clientVersion": "1.0"
         },
         "threatInfo": {
-            "threatTypes": ["MALWARE", "SOCIAL_ENGINEERING"],
+            "threatTypes": ["MALWARE","SOCIAL_ENGINEERING"],
             "platformTypes": ["ANY_PLATFORM"],
             "threatEntryTypes": ["URL"],
             "threatEntries": [{"url": url}]
@@ -110,13 +109,11 @@ def check_google_safe(url):
     try:
 
         r = requests.post(endpoint, json=body, timeout=10)
-
         data = r.json()
 
         return "matches" in data
 
     except:
-
         return False
 
 # =============================
@@ -142,8 +139,8 @@ def scan_with_virustotal(url):
         stats = report.json()["data"]["attributes"]["last_analysis_stats"]
 
         return {
-            "malicious": stats.get("malicious", 0),
-            "suspicious": stats.get("suspicious", 0)
+            "malicious": stats.get("malicious",0),
+            "suspicious": stats.get("suspicious",0)
         }
 
     return None
@@ -158,6 +155,7 @@ def analyze_heuristics(url):
     reasons = []
 
     parsed = urlparse(url)
+
     host = parsed.netloc.lower()
     full_url = url.lower()
 
@@ -173,12 +171,12 @@ def analyze_heuristics(url):
         risk += 25
         reasons.append("URL uses raw IP address")
 
-    # Hyphens
+    # Hyphen detection
     if host.count("-") >= 2:
         risk += 10
         reasons.append("Excessive hyphens in domain")
 
-    # Keywords
+    # Phishing keywords
     if any(k in full_url for k in PHISHING_KEYWORDS):
         risk += 20
         reasons.append("Phishing keywords detected")
@@ -188,24 +186,22 @@ def analyze_heuristics(url):
         risk += 30
         reasons.append("Brand impersonation suspected")
 
-    # Entropy
-    entropy = calculate_entropy(host)
+    # Entropy detection
+    entropy = calculate_entropy(host.replace(".", ""))
 
     if entropy > 2.9:
         risk += 15
         reasons.append("High entropy domain")
 
-
-    # Digit ratio detection (DGA style domains)
+    # Digit ratio detection
     digits = sum(c.isdigit() for c in host)
-    ratio = digits / len(host)
+    ratio = digits / max(len(host),1)
 
     if ratio > 0.3:
         risk += 15
         reasons.append("High digit ratio domain")
 
-
-    # Domain age
+    # Domain age detection
     domain_age = get_domain_age(host)
 
     if domain_age is not None and domain_age < 30:
@@ -215,14 +211,14 @@ def analyze_heuristics(url):
     return risk, reasons, domain_age
 
 # =============================
-# ANALYZE
+# ANALYZE ENDPOINT
 # =============================
 
 @app.route("/analyze", methods=["POST"])
 def analyze():
 
     data = request.get_json()
-    url = data.get("url", "")
+    url = data.get("url","")
 
     heuristic_risk, heuristic_reasons, domain_age = analyze_heuristics(url)
 
@@ -233,14 +229,14 @@ def analyze():
     if check_google_safe(url):
 
         return jsonify({
-            "backend": "alive",
-            "engine": "Google Safe Browsing",
-            "url": url,
-            "domain_age_days": domain_age,
-            "final_verdict": {
-                "verdict": "Dangerous",
-                "confidence": 95,
-                "reasons": ["Flagged by Google Safe Browsing"]
+            "backend":"alive",
+            "engine":"Google Safe Browsing",
+            "url":url,
+            "domain_age_days":domain_age,
+            "final_verdict":{
+                "verdict":"Dangerous",
+                "confidence":95,
+                "reasons":["Flagged by Google Safe Browsing"]
             }
         })
 
@@ -253,7 +249,7 @@ def analyze():
             risk += 40
             reasons.append("Detected malicious by security engine")
 
-    # Verdict
+    # Final verdict
     if risk >= 70:
         verdict = "Dangerous"
     elif risk >= 30:
@@ -261,22 +257,26 @@ def analyze():
     else:
         verdict = "Safe"
 
-    confidence = min(95, max(5, risk))
+    confidence = min(95,max(5,risk))
 
     return jsonify({
-        "backend": "alive",
-        "engine": "Heuristics + Threat Intelligence",
-        "url": url,
-        "domain_age_days": domain_age,
-        "final_verdict": {
-            "verdict": verdict,
-            "confidence": confidence,
-            "reasons": reasons if reasons else ["No strong indicators detected"]
+        "backend":"alive",
+        "engine":"Heuristics + Threat Intelligence",
+        "url":url,
+        "domain_age_days":domain_age,
+        "final_verdict":{
+            "verdict":verdict,
+            "confidence":confidence,
+            "reasons":reasons if reasons else ["No strong indicators detected"]
         }
     })
 
+# =============================
+# RUN SERVER
+# =============================
+
 if __name__ == "__main__":
 
-    port = int(os.environ.get("PORT", 5000))
+    port = int(os.environ.get("PORT",5000))
 
-    app.run(host="0.0.0.0", port=port)
+    app.run(host="0.0.0.0",port=port)
