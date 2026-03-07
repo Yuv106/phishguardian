@@ -5,9 +5,13 @@ import requests
 import time
 import re
 import base64
+import math
+import whois
 from urllib.parse import urlparse
+from datetime import datetime
 
 VT_API_KEY = os.environ.get("VT_API_KEY")
+GOOGLE_SAFE_BROWSING_KEY = os.environ.get("GOOGLE_SAFE_BROWSING_KEY")
 
 app = Flask(__name__)
 CORS(app)
@@ -16,39 +20,32 @@ CORS(app)
 # CONFIG
 # =============================
 
+OPENPHISH_FEED = "https://openphish.com/feed.txt"
+
 SUSPICIOUS_TLDS = [
-".tk",".xyz",".top",".gq",".ml",".cf",".click",".support",".zip",".mov",".work",".country",".stream",".download",".xin",".gdn",".mom",".men",".date",".review",".trade",".account",".loan",".finance",".science",".party",".racing",".win",".bid",".faith",".cricket",".jetzt",".cam",".buzz",".link",".live",".site",".online",".monster",".world",".today",".pro",".pw",".rest",".website",".space",".icu",".fun",".uno",".cfd",".lol",".shop",".cloud"
+".tk",".xyz",".top",".gq",".ml",".cf",".click",".support",".zip",".mov",
+".work",".country",".stream",".download",".xin",".gdn",".mom",".men",".date",
+".review",".trade",".account",".loan",".finance",".science",".party",".racing",
+".win",".bid",".faith",".cam",".buzz",".link",".live",".site",".online",".monster",
+".world",".today",".pro",".pw",".rest",".website",".space",".icu",".fun",".uno",
+".cfd",".lol",".shop",".cloud"
 ]
 
 PHISHING_KEYWORDS = [
-"login","signin","logon","verify","verification","secure","security","account",
-"update","password","passcode","pin","auth","authenticate","validation",
-"urgent","alert","warning","immediate","suspended","locked","restricted",
-"attention","important","action","required","security-check",
-"bank","wallet","payment","billing","invoice","refund","transfer",
-"transaction","deposit","withdraw","balance","card","credit","debit",
-"bonus","reward","claim","gift","prize","free","promo","offer",
-"support","service","helpdesk","recovery","reset","confirmation",
-"portal","dashboard","webscr","client","customer","member",
-"validate","confirm","secure-update","account-update"
+"login","signin","verify","secure","account","update","password",
+"bank","wallet","payment","billing","invoice","refund",
+"urgent","alert","suspended","locked","confirm","validation",
+"bonus","reward","claim","gift","free","promo"
 ]
 
 BRAND_KEYWORDS = [
 "google","gmail","youtube","microsoft","office","outlook","live",
-"apple","icloud","appleid",
-"facebook","instagram","whatsapp","snapchat","twitter","x","tiktok",
-"amazon","ebay","aliexpress","flipkart","shopify","temu",
-"paypal","stripe","paytm","phonepe","gpay","googlepay","razorpay",
-"binance","coinbase","kraken","metamask","trustwallet","phantom",
-"blockchain","ledger","crypto","walletconnect",
-"netflix","spotify","primevideo","disney","hulu",
-"bank","chase","citi","wellsfargo","hsbc","barclays","capitalone",
-"deutschebank","santander","lloyds",
-"hdfc","icici","sbi","axis","kotak","yesbank","pnb","idfc","indusind",
-"github","slack","zoom","dropbox","notion","atlassian"
+"apple","icloud","appleid","facebook","instagram","whatsapp",
+"amazon","ebay","flipkart","shopify","paypal","stripe","paytm",
+"phonepe","gpay","binance","coinbase","kraken","metamask",
+"netflix","spotify","primevideo","bank","hdfc","icici","sbi",
+"axis","kotak","github","slack","zoom"
 ]
-
-OPENPHISH_FEED = "https://openphish.com/feed.txt"
 
 # =============================
 # HEALTH CHECK
@@ -59,7 +56,43 @@ def home():
     return "PhishGuardian backend is alive 🟢"
 
 # =============================
-# HEURISTIC ENGINE
+# SHANNON ENTROPY
+# =============================
+
+def shannon_entropy(domain):
+
+    prob = [float(domain.count(c)) / len(domain) for c in dict.fromkeys(list(domain))]
+    entropy = -sum([p * math.log(p) / math.log(2.0) for p in prob])
+
+    return entropy
+
+# =============================
+# DOMAIN AGE CHECK
+# =============================
+
+def domain_age(host):
+
+    try:
+
+        w = whois.whois(host)
+
+        creation_date = w.creation_date
+
+        if isinstance(creation_date, list):
+            creation_date = creation_date[0]
+
+        if creation_date:
+
+            age_days = (datetime.now() - creation_date).days
+            return age_days
+
+        return None
+
+    except:
+        return None
+
+# =============================
+# HEURISTICS ENGINE
 # =============================
 
 def analyze_heuristics(url):
@@ -71,54 +104,65 @@ def analyze_heuristics(url):
     host = parsed.netloc.lower()
     full_url = url.lower()
 
+    # Suspicious TLD
     for tld in SUSPICIOUS_TLDS:
         if host.endswith(tld):
             risk += 20
             reasons.append(f"Suspicious TLD detected ({tld})")
             break
 
+    # Raw IP
     if re.match(r"^\d+\.\d+\.\d+\.\d+$", host):
         risk += 25
         reasons.append("URL uses raw IP address")
 
+    # Punycode
     if "xn--" in host:
         risk += 25
         reasons.append("Punycode domain detected")
 
-    if re.search(r"[0-9]", host):
-        if any(c in host for c in ["0","1","3","5","7"]):
-            risk += 10
-            reasons.append("Possible homograph character substitution")
-
+    # Hyphens
     if host.count("-") >= 2:
         risk += 15
         reasons.append("Excessive hyphens in domain")
 
+    # Keywords
     keyword_hits = [k for k in PHISHING_KEYWORDS if k in full_url]
 
     if keyword_hits:
         risk += 20
         reasons.append("Phishing keywords detected")
 
+    # Brand impersonation
     brand_hits = [b for b in BRAND_KEYWORDS if b in host]
 
     if brand_hits and keyword_hits:
         risk += 30
         reasons.append("Brand impersonation suspected")
 
+    # Subdomains
     if host.count(".") >= 3:
         risk += 15
         reasons.append("Excessive subdomains detected")
 
-    for brand in BRAND_KEYWORDS:
-        if brand in host and not host.startswith(brand):
-            risk += 10
-            reasons.append("Brand name found in subdomain")
-            break
-
+    # URL length
     if len(url) > 120:
         risk += 10
         reasons.append("Unusually long URL")
+
+    # Entropy
+    entropy = shannon_entropy(host)
+
+    if entropy > 4:
+        risk += 15
+        reasons.append("High entropy domain (randomized domain)")
+
+    # Domain age
+    age = domain_age(host)
+
+    if age and age < 30:
+        risk += 25
+        reasons.append("Very new domain (less than 30 days old)")
 
     return risk, reasons
 
@@ -130,21 +174,58 @@ def check_openphish(url):
 
     try:
 
-        response = requests.get(OPENPHISH_FEED, timeout=10)
+        r = requests.get(OPENPHISH_FEED, timeout=10)
 
-        if response.status_code != 200:
+        if r.status_code != 200:
             return False
 
-        feed_urls = response.text.splitlines()
+        feed_urls = r.text.splitlines()
 
-        for phishing_url in feed_urls:
-            if url.startswith(phishing_url):
+        for p in feed_urls:
+
+            if url.startswith(p):
                 return True
 
         return False
 
-    except Exception:
+    except:
         return False
+
+# =============================
+# GOOGLE SAFE BROWSING
+# =============================
+
+def check_google_safe_browsing(url):
+
+    if not GOOGLE_SAFE_BROWSING_KEY:
+        return False
+
+    endpoint = f"https://safebrowsing.googleapis.com/v4/threatMatches:find?key={GOOGLE_SAFE_BROWSING_KEY}"
+
+    payload = {
+        "client": {
+            "clientId": "phishguardian",
+            "clientVersion": "1.0"
+        },
+        "threatInfo": {
+            "threatTypes": ["MALWARE", "SOCIAL_ENGINEERING"],
+            "platformTypes": ["ANY_PLATFORM"],
+            "threatEntryTypes": ["URL"],
+            "threatEntries": [{"url": url}]
+        }
+    }
+
+    r = requests.post(endpoint, json=payload)
+
+    if r.status_code != 200:
+        return False
+
+    data = r.json()
+
+    if "matches" in data:
+        return True
+
+    return False
 
 # =============================
 # VIRUSTOTAL
@@ -168,42 +249,9 @@ def scan_with_virustotal(url):
 
         stats = report.json()["data"]["attributes"]["last_analysis_stats"]
 
-        return {
-            "malicious": stats.get("malicious", 0),
-            "suspicious": stats.get("suspicious", 0),
-            "harmless": stats.get("harmless", 0),
-            "undetected": stats.get("undetected", 0),
-        }
+        return stats
 
-    submit = requests.post(
-        "https://www.virustotal.com/api/v3/urls",
-        headers=headers,
-        data={"url": url}
-    )
-
-    if submit.status_code != 200:
-        return None
-
-    analysis_id = submit.json()["data"]["id"]
-
-    time.sleep(3)
-
-    analysis = requests.get(
-        f"https://www.virustotal.com/api/v3/analyses/{analysis_id}",
-        headers=headers
-    )
-
-    if analysis.status_code != 200:
-        return None
-
-    stats = analysis.json()["data"]["attributes"]["stats"]
-
-    return {
-        "malicious": stats.get("malicious", 0),
-        "suspicious": stats.get("suspicious", 0),
-        "harmless": stats.get("harmless", 0),
-        "undetected": stats.get("undetected", 0),
-    }
+    return None
 
 # =============================
 # MERGE ENGINE
@@ -249,22 +297,35 @@ def analyze():
     data = request.get_json()
     url = data.get("url", "")
 
-    heuristic_risk, heuristic_reasons = analyze_heuristics(url)
-
+    # OpenPhish
     if check_openphish(url):
 
         return jsonify({
             "backend": "alive",
-            "engine": "Heuristics + OpenPhish + VirusTotal",
+            "engine": "OpenPhish",
             "url": url,
-            "heuristic_risk": 100,
-            "virustotal": None,
             "final_verdict": {
                 "verdict": "Dangerous",
                 "confidence": 95,
                 "reasons": ["URL found in OpenPhish phishing database"]
             }
         })
+
+    # Google Safe Browsing
+    if check_google_safe_browsing(url):
+
+        return jsonify({
+            "backend": "alive",
+            "engine": "Google Safe Browsing",
+            "url": url,
+            "final_verdict": {
+                "verdict": "Dangerous",
+                "confidence": 95,
+                "reasons": ["Flagged by Google Safe Browsing"]
+            }
+        })
+
+    heuristic_risk, heuristic_reasons = analyze_heuristics(url)
 
     vt_stats = scan_with_virustotal(url)
 
@@ -276,7 +337,7 @@ def analyze():
 
     return jsonify({
         "backend": "alive",
-        "engine": "Heuristics + OpenPhish + VirusTotal",
+        "engine": "Heuristics + Threat Intelligence",
         "url": url,
         "heuristic_risk": heuristic_risk,
         "virustotal": vt_stats,
