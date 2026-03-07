@@ -4,299 +4,171 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>PhishGuardian</title>
-
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 
 <style>
-
-body{
-margin:0;
-font-family:Inter;
-background:#0b1220;
-color:#e5e7eb
-}
-
-.container{
-max-width:1000px;
-margin:auto;
-padding:24px
-}
-
-.card{
-background:#0f172a;
-border-radius:14px;
-padding:18px;
-margin-top:20px
-}
-
+body{margin:0;font-family:Inter;background:#0b1220;color:#e5e7eb}
+.container{max-width:1000px;margin:auto;padding:24px}
+.card{background:#0f172a;border-radius:14px;padding:18px;margin-top:20px}
 .input{
-width:100%;
-padding:12px;
-border-radius:12px;
-border:1px solid #334155;
-background:linear-gradient(180deg,#020617,#020617 60%,#01040d);
-color:#fff;
-font-size:15px;
-transition:border-color .2s ease, box-shadow .2s ease
+  width:100%;
+  padding:12px;
+  border-radius:12px;
+  border:1px solid #334155;
+  background:linear-gradient(180deg,#020617,#020617 60%,#01040d);
+  color:#fff;
+  font-size:15px;
+  transition:border-color .2s ease, box-shadow .2s ease;
 }
 
 .input:focus{
-outline:none;
-border-color:#22d3ee;
-box-shadow:
-inset 0 1px 0 rgba(255,255,255,0.05),
-0 0 0 3px rgba(34,211,238,0.25),
-0 0 18px rgba(34,211,238,0.35)
+  outline:none;
+  border-color:#22d3ee;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.05),
+    0 0 0 3px rgba(34,211,238,0.25),
+    0 0 18px rgba(34,211,238,0.35);
 }
 
-/* BUTTONS */
-
-.btn{
-padding:12px 16px;
-border-radius:12px;
-border:none;
-font-weight:600;
-cursor:pointer;
-text-decoration:none;
-display:inline-block
-}
-
+.btn{padding:12px 16px;border-radius:12px;border:none;font-weight:600;cursor:pointer}
 .btn-primary{
-background:linear-gradient(135deg,#22d3ee,#60a5fa);
-color:#071427;
-box-shadow:0 8px 24px rgba(34,211,238,0.35);
-transition:all .2s ease
+  background: linear-gradient(135deg, #22d3ee, #60a5fa);
+  color:#071427;
+  box-shadow:
+    0 8px 24px rgba(34,211,238,0.35),
+    inset 0 1px 0 rgba(255,255,255,0.35);
+  transition: transform .05s ease, box-shadow .2s ease;
 }
 
 .btn-primary:hover{
-box-shadow:
-0 0 12px rgba(34,211,238,0.9),
-0 0 24px rgba(34,211,238,0.7),
-0 8px 24px rgba(34,211,238,0.4);
-transform:translateY(-1px)
+  box-shadow:
+    0 10px 30px rgba(34,211,238,0.55),
+    inset 0 1px 0 rgba(255,255,255,0.4);
+}
+
+.btn-primary:active{
+  transform: translateY(1px);
 }
 
 .btn-ghost{
-background:#020617;
-color:#e5e7eb;
-border:1px solid #334155;
-transition:all .2s ease
+  background:#020617;
+  color:#e5e7eb;
+  border:1px solid #334155;
+  transition: box-shadow .2s ease, border-color .2s ease;
 }
 
 .btn-ghost:hover{
-border-color:#22d3ee;
-box-shadow:
-0 0 10px rgba(34,211,238,0.7),
-0 0 18px rgba(34,211,238,0.5)
+  border-color:#22d3ee;
+  box-shadow:0 0 0 3px rgba(34,211,238,0.25);
 }
 
-.badge{
-padding:4px 10px;
-border-radius:999px;
-font-size:12px;
-font-weight:800
-}
+.badge{padding:4px 10px;border-radius:999px;font-size:12px;font-weight:800}
+.safe{background:#14532d;color:#22c55e}
+.suspicious{background:#78350f;color:#f59e0b}
+.danger{background:#7f1d1d;color:#f43f5e}
+.muted{color:#94a3b8}
 
-.safe{
-background:#14532d;
-color:#22c55e
-}
+.nav{display:flex;justify-content:space-between;align-items:center}
+.nav .cta a{margin-left:10px;text-decoration:none}
 
-.suspicious{
-background:#78350f;
-color:#f59e0b
-}
-
-.danger{
-background:#7f1d1d;
-color:#f43f5e
-}
-
-.muted{
-color:#94a3b8
-}
-
-.nav{
-display:flex;
-justify-content:space-between;
-align-items:center
-}
-
-.nav .cta a{
-margin-left:10px
-}
-
-.scan-row{
-display:flex;
-gap:12px;
-margin-top:12px
-}
-
-@media(max-width:640px){
-.scan-row{flex-direction:column}
-}
-
-/* SPINNER */
+.scan-row{display:flex;gap:12px;margin-top:12px}
+@media(max-width:640px){.scan-row{flex-direction:column}}
 
 .spinner{
-width:18px;
-height:18px;
-border:3px solid rgba(255,255,255,0.2);
-border-top:3px solid #22d3ee;
-border-radius:50%;
-animation:spin 0.8s linear infinite
+  width:18px;
+  height:18px;
+  border:3px solid rgba(255,255,255,0.2);
+  border-top:3px solid #22d3ee;
+  border-radius:50%;
+  animation:spin 0.8s linear infinite;
+  display:inline-block;
+  vertical-align:middle;
 }
 
 @keyframes spin{
-from{transform:rotate(0deg)}
-to{transform:rotate(360deg)}
+  from{transform:rotate(0deg)}
+  to{transform:rotate(360deg)}
 }
 
 .loading{
-display:flex;
-align-items:center;
-gap:8px;
-margin-top:10px;
-color:#94a3b8;
-font-size:14px
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin-top:10px;
+  color:#94a3b8;
+  font-size:14px;
 }
 
 </style>
 </head>
 
 <body>
-
 <div class="container">
 
 <!-- NAV -->
-
 <div class="nav">
-
-<h1>PhishGuardian 🛡️</h1>
-
-<div class="cta">
-
-<a id="tryAnalyzerBtn" class="btn btn-ghost" href="#analyzer">
-Try Analyzer
-</a>
-
-<a class="btn btn-ghost" href="#status">
-Status
-</a>
-
-<a class="btn btn-ghost"
-target="_blank"
-href="https://mail.google.com/mail/?view=cm&fs=1&to=yuvraj.patel@mitwpu.edu.in&su=PhishGuardian%20Contact">
-
-Contact
-
-</a>
-
+  <h1>PhishGuardian 🛡️</h1>
+  <div class="cta">
+    <a class="btn btn-ghost" href="#analyzer">Try Analyzer</a>
+    <a class="btn btn-ghost" href="#status">Status</a>
+    <a class="btn btn-ghost" target="_blank"
+      href="https://mail.google.com/mail/?view=cm&fs=1&to=yuvraj.patel@mitwpu.edu.in&su=PhishGuardian%20Contact">
+      Contact
+    </a>
+  </div>
 </div>
 
-</div>
-
-<p class="muted">
-Client-side phishing detection with live backend validation.
-</p>
+<p class="muted">Client-side phishing detection with live backend validation.</p>
 
 <!-- ANALYZER -->
-
 <form id="scanForm" class="scan-row">
-
-<input
-id="urlInput"
-class="input"
-placeholder="Paste a URL to scan"
-/>
-
-<button id="scanBtn" type="submit" class="btn btn-primary">
-Scan
-</button>
-
+  <input id="urlInput" class="input" placeholder="Paste a URL to scan">
+  <button id="scanBtn" type="submit" class="btn btn-primary">Scan</button>
 </form>
 
 <div id="loading" class="loading" style="display:none">
-
-<span class="spinner"></span>
-
-Scanning URL...
-
+  <span class="spinner"></span>
+  Scanning URL...
 </div>
 
 <div id="result" style="display:none;margin-top:16px">
+  <span id="verdictBadge" class="badge"></span>
+  <span class="muted">
+    Confidence: <strong><span id="confidenceVal"></span>%</strong>
+  </span>
 
-<span id="verdictBadge" class="badge"></span>
+  <p class="muted" id="normalizedLine"></p>
 
-<span class="muted">
+  <!-- DOMAIN AGE -->
+  <p class="muted" id="domainAgeLine"></p>
 
-Confidence:
-<strong><span id="confidenceVal"></span>%</strong>
+  <div id="reasonsWrap"></div>
 
-</span>
-
-<p class="muted" id="normalizedLine"></p>
-
-<div id="reasonsWrap"></div>
-
-<p class="muted">
-
-Engine:
-<span id="engineVal"></span>
-
-</p>
-
+  <p class="muted">
+    Engine: <span id="engineVal"></span>
+  </p>
 </div>
 
 <!-- STATUS -->
-
 <div id="status" class="card">
-
-<h3>Current Status</h3>
-
-<ul>
-
-<li>
-<strong>Phase 2:</strong>
-Live Python backend deployed (Render) ✅
-</li>
-
-<li>
-Heuristics + VirusTotal + Google Safe Browsing
-</li>
-
-<li>
-Domain age analysis (WHOIS)
-</li>
-
-<li>
-Entropy phishing detection
-</li>
-
-<li>
-Explainable detection reasons
-</li>
-
-</ul>
-
+  <h3>Current Status</h3>
+  <ul>
+    <li><strong>Phase 2:</strong> Live Python backend deployed (Render) ✅</li>
+    <li>Heuristics + VirusTotal + Google Safe Browsing</li>
+    <li>Domain age analysis (WHOIS)</li>
+    <li>Entropy phishing detection</li>
+    <li>Explainable detection reasons</li>
+  </ul>
 </div>
 
 <!-- UPCOMING -->
-
 <div class="card">
-
-<h3>Upcoming (Phase 3)</h3>
-
-<ul>
-
-<li>Machine learning phishing classifier</li>
-
-<li>Adaptive risk scoring</li>
-
-<li>Continuous phishing dataset training</li>
-
-</ul>
-
+  <h3>Upcoming (Phase 3)</h3>
+  <ul>
+    <li>Machine learning phishing classifier</li>
+    <li>Adaptive risk scoring</li>
+    <li>Continuous phishing dataset training</li>
+  </ul>
 </div>
 
 </div>
@@ -311,6 +183,7 @@ const result = document.getElementById("result");
 const verdictBadge = document.getElementById("verdictBadge");
 const confidenceVal = document.getElementById("confidenceVal");
 const normalizedLine = document.getElementById("normalizedLine");
+const domainAgeLine = document.getElementById("domainAgeLine");
 const reasonsWrap = document.getElementById("reasonsWrap");
 const engineVal = document.getElementById("engineVal");
 const scanBtn = document.getElementById("scanBtn");
@@ -327,11 +200,9 @@ async function analyzeWithBackend(url){
 try{
 
 const r = await fetch(`${BACKEND_URL}/analyze`,{
-
 method:"POST",
 headers:{ "Content-Type":"application/json" },
 body:JSON.stringify({url})
-
 });
 
 return await r.json();
@@ -359,23 +230,17 @@ if(!/^https?:\/\//i.test(url))
 url = "http://" + url;
 
 result.style.display="none";
-
 scanBtn.disabled=true;
-
 loading.style.display="flex";
 
 const backend = await analyzeWithBackend(url);
 
 loading.style.display="none";
-
 scanBtn.disabled=false;
 
 if(!backend){
-
 alert("Backend not reachable");
-
 return;
-
 }
 
 const verdict = backend.final_verdict.verdict;
@@ -390,10 +255,8 @@ verdictBadge.className="badge ";
 
 if(verdict==="Safe")
 verdictBadge.className+="safe";
-
 else if(verdict==="Suspicious")
 verdictBadge.className+="suspicious";
-
 else
 verdictBadge.className+="danger";
 
@@ -403,48 +266,34 @@ engineVal.textContent = backend.engine;
 
 normalizedLine.textContent = `URL: ${url} • Host: ${host}`;
 
+/* DOMAIN AGE DISPLAY */
+
+if(backend.domain_age_days !== undefined && backend.domain_age_days !== null){
+domainAgeLine.textContent = `Domain age: ${backend.domain_age_days} days`;
+}else{
+domainAgeLine.textContent = "";
+}
+
 const ul = document.createElement("ul");
 
 reasons.forEach(r=>{
-
 const li=document.createElement("li");
-
 li.textContent=r;
-
 ul.appendChild(li);
-
 });
 
 reasonsWrap.innerHTML="";
-
 reasonsWrap.appendChild(ul);
 
 result.style.display="block";
 
 });
 
-/* TRY ANALYZER FOCUS */
-
-document
-.getElementById("tryAnalyzerBtn")
-.addEventListener("click",function(){
-
-setTimeout(()=>{
-
-document.getElementById("urlInput").focus();
-
-},100);
-
-});
-
 </script>
 
-<footer class="muted"
-style="margin-top:40px;text-align:center;font-size:13px">
-
-© 2025 PhishGuardian — Built for learning & security awareness.
-Not a replacement for professional security tools.
-
+<footer class="muted" style="margin-top:40px;text-align:center;font-size:13px;">
+  © 2025 PhishGuardian — Built for learning & security awareness.  
+  Not a replacement for professional security tools.
 </footer>
 
 </body>
