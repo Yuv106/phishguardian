@@ -189,12 +189,21 @@ def analyze_heuristics(url):
         reasons.append("Brand impersonation suspected")
 
     # Entropy
+    
     entropy = calculate_entropy(host)
 
-    if entropy > 2.9:
-        risk += 15
-        reasons.append("High entropy domain")
+if entropy > 2.9:
+    risk += 15
+    reasons.append("High entropy domain")
 
+
+# digit ratio detection (DGA style domains)
+digits = sum(c.isdigit() for c in host)
+ratio = digits / len(host)
+
+if ratio > 0.3:
+    risk += 15
+    reasons.append("High digit ratio domain")
     # Domain age
     domain_age = get_domain_age(host)
 
