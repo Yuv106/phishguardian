@@ -4,6 +4,7 @@ import os
 import requests
 import time
 import re
+import base64
 from urllib.parse import urlparse
 
 VT_API_KEY = os.environ.get("VT_API_KEY")
@@ -15,19 +16,71 @@ CORS(app)
 # CONFIG
 # =============================
 
+# High-risk TLDs frequently used in phishing
 SUSPICIOUS_TLDS = [
-    ".tk", ".xyz", ".top", ".gq", ".ml", ".cf", ".click", ".support"
+".tk",".xyz",".top",".gq",".ml",".cf",".click",".support",".zip",".mov",".work",".country",".stream",".download",".xin",".gdn",".mom",".men",".date",".review",".trade",".account",".loan",".finance",".science",".party",".racing",".win",".bid",".faith",".cricket",".jetzt",".cam",".buzz",".link",".live",".site",".online",".monster",".world",".today",".pro",".pw",".rest",".website",".space",".icu",".fun",".uno",".cfd",".lol",".shop",".cloud"
 ]
 
+# Words commonly seen in phishing URLs
 PHISHING_KEYWORDS = [
-    "login", "verify", "secure", "account", "update",
-    "password", "bank", "wallet", "urgent", "alert",
-    "suspended", "bonus", "reward", "claim"
+
+# authentication
+"login","signin","logon","verify","verification","secure","security","account",
+"update","password","passcode","pin","auth","authenticate","validation",
+
+# urgency
+"urgent","alert","warning","immediate","suspended","locked","restricted",
+"attention","important","action","required","security-check",
+
+# financial
+"bank","wallet","payment","billing","invoice","refund","transfer",
+"transaction","deposit","withdraw","balance","card","credit","debit",
+
+# rewards / scams
+"bonus","reward","claim","gift","prize","free","promo","offer",
+
+# services
+"support","service","helpdesk","recovery","reset","confirmation",
+
+# fake portals
+"portal","dashboard","webscr","client","customer","member",
+
+# verification traps
+"validate","confirm","secure-update","account-update"
 ]
 
+# Brands frequently impersonated in phishing
 BRAND_KEYWORDS = [
-    "paypal", "appleid", "google", "microsoft",
-    "amazon", "netflix", "bank", "hdfc", "sbi"
+
+# Big tech
+"google","gmail","youtube","microsoft","office","outlook","live",
+"apple","icloud","appleid",
+
+# Social media
+"facebook","instagram","whatsapp","snapchat","twitter","x","tiktok",
+
+# E-commerce
+"amazon","ebay","aliexpress","flipkart","shopify","temu",
+
+# Payments
+"paypal","stripe","paytm","phonepe","gpay","googlepay","razorpay",
+
+# Crypto
+"binance","coinbase","kraken","metamask","trustwallet","phantom",
+"blockchain","ledger","crypto","walletconnect",
+
+# Streaming
+"netflix","spotify","primevideo","disney","hulu",
+
+# Banks global
+"bank","chase","citi","wellsfargo","hsbc","barclays","capitalone",
+"deutschebank","santander","lloyds",
+
+# Banks india
+"hdfc","icici","sbi","axis","kotak","yesbank","pnb","idfc","indusind",
+
+# SaaS
+"github","slack","zoom","dropbox","notion","atlassian"
 ]
 
 # =============================
@@ -50,53 +103,50 @@ def analyze_heuristics(url):
 
     parsed = urlparse(url)
     host = parsed.netloc.lower()
-    path = parsed.path.lower()
-
     full_url = url.lower()
 
-    # 1️⃣ Suspicious TLD
+    # Suspicious TLD
     for tld in SUSPICIOUS_TLDS:
         if host.endswith(tld):
             risk += 20
             reasons.append(f"Suspicious TLD detected ({tld})")
             break
 
-    # 2️⃣ Raw IP URL
+    # Raw IP URL
     if re.match(r"^\d+\.\d+\.\d+\.\d+$", host):
         risk += 25
         reasons.append("URL uses raw IP address")
 
-    # 3️⃣ Punycode (IDN phishing)
+    # Punycode detection
     if "xn--" in host:
         risk += 25
         reasons.append("Punycode domain detected")
 
-    # 3.5️⃣ Homograph character substitution
+    # Homograph detection
     if re.search(r"[0-9]", host):
-        if any(char in host for char in ["0","1","3","5","7"]):
+        if any(c in host for c in ["0","1","3","5","7"]):
             risk += 10
             reasons.append("Possible homograph character substitution")
 
-    # 4️⃣ Excessive hyphens
+    # Excessive hyphens
     if host.count("-") >= 2:
         risk += 15
         reasons.append("Excessive hyphens in domain")
 
-    # 5️⃣ Phishing keywords
+    # Phishing keywords
     keyword_hits = [k for k in PHISHING_KEYWORDS if k in full_url]
     if keyword_hits:
         risk += 20
         reasons.append("Phishing keywords detected")
 
-    # 6️⃣ Brand impersonation
+    # Brand impersonation
     brand_hits = [b for b in BRAND_KEYWORDS if b in host]
-    if brand_hits and any(k in full_url for k in PHISHING_KEYWORDS):
+    if brand_hits and keyword_hits:
         risk += 30
         reasons.append("Brand impersonation suspected")
 
-    # 7️⃣ Suspicious subdomain patterns
-    subdomain_count = host.count(".")
-    if subdomain_count >= 3:
+    # Suspicious subdomains
+    if host.count(".") >= 3:
         risk += 15
         reasons.append("Excessive subdomains detected")
 
@@ -106,26 +156,16 @@ def analyze_heuristics(url):
             reasons.append("Brand name found in subdomain")
             break
 
-    # 8️⃣ Long URL
+    # Long URL
     if len(url) > 120:
         risk += 10
         reasons.append("Unusually long URL")
-
-    # 9️⃣ Random domain pattern detection
-    letters = re.sub(r"[^a-z]", "", host)
-
-    if len(letters) > 12:
-        unique_ratio = len(set(letters)) / len(letters)
-
-        if unique_ratio > 0.65:
-            risk += 10
-            reasons.append("Randomized domain pattern detected")
 
     return risk, reasons
 
 
 # =============================
-# VIRUSTOTAL
+# VIRUSTOTAL (IMPROVED)
 # =============================
 
 def scan_with_virustotal(url):
@@ -135,11 +175,31 @@ def scan_with_virustotal(url):
 
     headers = {"x-apikey": VT_API_KEY}
 
+    # Encode URL for lookup
+    url_id = base64.urlsafe_b64encode(url.encode()).decode().strip("=")
+
+    # 1️⃣ Check if VT already has report
+    report = requests.get(
+        f"https://www.virustotal.com/api/v3/urls/{url_id}",
+        headers=headers
+    )
+
+    if report.status_code == 200:
+
+        stats = report.json()["data"]["attributes"]["last_analysis_stats"]
+
+        return {
+            "malicious": stats.get("malicious", 0),
+            "suspicious": stats.get("suspicious", 0),
+            "harmless": stats.get("harmless", 0),
+            "undetected": stats.get("undetected", 0),
+        }
+
+    # 2️⃣ Submit new scan
     submit = requests.post(
         "https://www.virustotal.com/api/v3/urls",
         headers=headers,
-        data={"url": url},
-        timeout=15
+        data={"url": url}
     )
 
     if submit.status_code != 200:
@@ -151,8 +211,7 @@ def scan_with_virustotal(url):
 
     analysis = requests.get(
         f"https://www.virustotal.com/api/v3/analyses/{analysis_id}",
-        headers=headers,
-        timeout=15
+        headers=headers
     )
 
     if analysis.status_code != 200:
@@ -193,10 +252,8 @@ def merge_results(heuristic_risk, heuristic_reasons, vt_stats):
 
     if risk >= 70:
         verdict = "Dangerous"
-
     elif risk >= 30:
         verdict = "Suspicious"
-
     else:
         verdict = "Safe"
 
