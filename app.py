@@ -38,11 +38,13 @@ BRAND_KEYWORDS = [
 def home():
     return "PhishGuardian backend is alive 🟢"
 
+
 # =============================
 # HEURISTIC ENGINE
 # =============================
 
 def analyze_heuristics(url):
+
     risk = 0
     reasons = []
 
@@ -59,15 +61,21 @@ def analyze_heuristics(url):
             reasons.append(f"Suspicious TLD detected ({tld})")
             break
 
-    # 2️⃣ IP address URL
+    # 2️⃣ Raw IP URL
     if re.match(r"^\d+\.\d+\.\d+\.\d+$", host):
         risk += 25
         reasons.append("URL uses raw IP address")
 
-    # 3️⃣ Punycode detection
+    # 3️⃣ Punycode (IDN phishing)
     if "xn--" in host:
         risk += 25
         reasons.append("Punycode domain detected")
+
+    # 3.5️⃣ Homograph character substitution
+    if re.search(r"[0-9]", host):
+        if any(char in host for char in ["0","1","3","5","7"]):
+            risk += 10
+            reasons.append("Possible homograph character substitution")
 
     # 4️⃣ Excessive hyphens
     if host.count("-") >= 2:
@@ -86,23 +94,42 @@ def analyze_heuristics(url):
         risk += 30
         reasons.append("Brand impersonation suspected")
 
-    # 7️⃣ Excessive subdomains
-    if host.count(".") >= 3:
-        risk += 10
-        reasons.append("Excessive subdomains")
+    # 7️⃣ Suspicious subdomain patterns
+    subdomain_count = host.count(".")
+    if subdomain_count >= 3:
+        risk += 15
+        reasons.append("Excessive subdomains detected")
+
+    for brand in BRAND_KEYWORDS:
+        if brand in host and not host.startswith(brand):
+            risk += 10
+            reasons.append("Brand name found in subdomain")
+            break
 
     # 8️⃣ Long URL
     if len(url) > 120:
         risk += 10
         reasons.append("Unusually long URL")
 
+    # 9️⃣ Random domain pattern detection
+    letters = re.sub(r"[^a-z]", "", host)
+
+    if len(letters) > 12:
+        unique_ratio = len(set(letters)) / len(letters)
+
+        if unique_ratio > 0.65:
+            risk += 10
+            reasons.append("Randomized domain pattern detected")
+
     return risk, reasons
+
 
 # =============================
 # VIRUSTOTAL
 # =============================
 
 def scan_with_virustotal(url):
+
     if not VT_API_KEY:
         return None
 
@@ -140,29 +167,36 @@ def scan_with_virustotal(url):
         "undetected": stats.get("undetected", 0),
     }
 
+
 # =============================
 # MERGE ENGINE
 # =============================
 
 def merge_results(heuristic_risk, heuristic_reasons, vt_stats):
+
     risk = heuristic_risk
     reasons = list(heuristic_reasons)
 
     if vt_stats:
+
         if vt_stats["malicious"] >= 2:
             risk += 60
             reasons.append("Detected malicious by multiple engines")
+
         elif vt_stats["malicious"] >= 1:
             risk += 40
             reasons.append("Detected malicious by security engine")
+
         elif vt_stats["suspicious"] >= 1:
             risk += 20
             reasons.append("Flagged suspicious by security engine")
 
     if risk >= 70:
         verdict = "Dangerous"
+
     elif risk >= 30:
         verdict = "Suspicious"
+
     else:
         verdict = "Safe"
 
@@ -170,16 +204,19 @@ def merge_results(heuristic_risk, heuristic_reasons, vt_stats):
 
     return verdict, confidence, reasons
 
+
 # =============================
 # ANALYZE ENDPOINT
 # =============================
 
 @app.route("/analyze", methods=["POST"])
 def analyze():
+
     data = request.get_json()
     url = data.get("url", "")
 
     heuristic_risk, heuristic_reasons = analyze_heuristics(url)
+
     vt_stats = scan_with_virustotal(url)
 
     verdict, confidence, reasons = merge_results(
@@ -201,6 +238,9 @@ def analyze():
         }
     })
 
+
 if __name__ == "__main__":
+
     port = int(os.environ.get("PORT", 5000))
+
     app.run(host="0.0.0.0", port=port)
