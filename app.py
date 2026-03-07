@@ -191,7 +191,7 @@ def analyze_heuristics(url):
     # Entropy
     entropy = calculate_entropy(host)
 
-    if entropy > 3.3:
+    if entropy > 2.9:
         risk += 15
         reasons.append("High entropy domain")
 
