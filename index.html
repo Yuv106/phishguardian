@@ -4,366 +4,345 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>PhishGuardian</title>
+
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 
 <style>
 body{margin:0;font-family:Inter;background:#0b1220;color:#e5e7eb}
 .container{max-width:1000px;margin:auto;padding:24px}
 .card{background:#0f172a;border-radius:14px;padding:18px;margin-top:20px}
+
 .input{
-  width:100%;
-  padding:12px;
-  border-radius:12px;
-  border:1px solid #334155;
-  background:linear-gradient(180deg,#020617,#020617 60%,#01040d);
-  color:#fff;
-  font-size:15px;
-  transition:border-color .2s ease, box-shadow .2s ease;
+width:100%;
+padding:12px;
+border-radius:12px;
+border:1px solid #334155;
+background:linear-gradient(180deg,#020617,#020617 60%,#01040d);
+color:#fff;
+font-size:15px;
+transition:border-color .2s ease, box-shadow .2s ease;
 }
 
 .input:focus{
-  outline:none;
-  border-color:#22d3ee;
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.05),
-    0 0 0 3px rgba(34,211,238,0.25),
-    0 0 18px rgba(34,211,238,0.35);
+outline:none;
+border-color:#22d3ee;
+box-shadow:
+inset 0 1px 0 rgba(255,255,255,0.05),
+0 0 0 3px rgba(34,211,238,0.25),
+0 0 18px rgba(34,211,238,0.35);
 }
 
 .btn{padding:12px 16px;border-radius:12px;border:none;font-weight:600;cursor:pointer}
+
 .btn-primary{
-  background: linear-gradient(135deg, #22d3ee, #60a5fa);
-  color:#071427;
-  box-shadow:
-    0 8px 24px rgba(34,211,238,0.35),
-    inset 0 1px 0 rgba(255,255,255,0.35);
-  transition: transform .05s ease, box-shadow .2s ease;
-}
-
-.btn-primary:hover{
-  box-shadow:
-    0 10px 30px rgba(34,211,238,0.55),
-    inset 0 1px 0 rgba(255,255,255,0.4);
-}
-
-.btn-primary:active{
-  transform: translateY(1px);
+background: linear-gradient(135deg, #22d3ee, #60a5fa);
+color:#071427;
+box-shadow:
+0 8px 24px rgba(34,211,238,0.35),
+inset 0 1px 0 rgba(255,255,255,0.35);
 }
 
 .btn-ghost{
-  background:#020617;
-  color:#e5e7eb;
-  border:1px solid #334155;
-  transition: box-shadow .2s ease, border-color .2s ease;
-}
-
-.btn-ghost:hover{
-  border-color:#22d3ee;
-  box-shadow:0 0 0 3px rgba(34,211,238,0.25);
+background:#020617;
+color:#e5e7eb;
+border:1px solid #334155;
 }
 
 .badge{padding:4px 10px;border-radius:999px;font-size:12px;font-weight:800}
 .safe{background:#14532d;color:#22c55e}
 .suspicious{background:#78350f;color:#f59e0b}
 .danger{background:#7f1d1d;color:#f43f5e}
+
 .muted{color:#94a3b8}
 
 .nav{display:flex;justify-content:space-between;align-items:center}
 .nav .cta a{margin-left:10px;text-decoration:none}
 
 .scan-row{display:flex;gap:12px;margin-top:12px}
-@media(max-width:640px){.scan-row{flex-direction:column}}
+
+@media(max-width:640px){
+.scan-row{flex-direction:column}
+}
 
 .spinner{
-  width:18px;
-  height:18px;
-  border:3px solid rgba(255,255,255,0.2);
-  border-top:3px solid #22d3ee;
-  border-radius:50%;
-  animation:spin 0.8s linear infinite;
-  display:inline-block;
-  vertical-align:middle;
+width:18px;
+height:18px;
+border:3px solid rgba(255,255,255,0.2);
+border-top:3px solid #22d3ee;
+border-radius:50%;
+animation:spin 0.8s linear infinite;
 }
 
 @keyframes spin{
-  from{transform:rotate(0deg)}
-  to{transform:rotate(360deg)}
+from{transform:rotate(0deg)}
+to{transform:rotate(360deg)}
 }
 
 .loading{
-  display:flex;
-  align-items:center;
-  gap:8px;
-  margin-top:10px;
-  color:#94a3b8;
-  font-size:14px;
+display:flex;
+align-items:center;
+gap:8px;
+margin-top:10px;
+color:#94a3b8;
+font-size:14px;
 }
 
 </style>
 </head>
 
 <body>
+
 <div class="container">
 
 <!-- NAV -->
 <div class="nav">
-  <h1>PhishGuardian 🛡️</h1>
-  <div class="cta">
-    <a class="btn btn-ghost" href="#analyzer">Try Analyzer</a>
-    <a class="btn btn-ghost" href="#status">Status</a>
-    <a class="btn btn-ghost" target="_blank"
-      href="https://mail.google.com/mail/?view=cm&fs=1&to=yuvraj.patel@mitwpu.edu.in&su=PhishGuardian%20Contact">
-      Contact
-    </a>
-  </div>
+<h1>PhishGuardian 🛡️</h1>
+
+<div class="cta">
+<a class="btn btn-ghost" href="#analyzer">Try Analyzer</a>
+<a class="btn btn-ghost" href="#status">Status</a>
+
+<a class="btn btn-ghost"
+target="_blank"
+href="https://mail.google.com/mail/?view=cm&fs=1&to=yuvraj.patel@mitwpu.edu.in&su=PhishGuardian%20Contact">
+Contact
+</a>
+
+</div>
 </div>
 
-<p class="muted">Client-side phishing detection with live backend validation.</p>
+<p class="muted">
+Client-side phishing detection with live backend validation.
+</p>
 
 <!-- ANALYZER -->
 <form id="scanForm" class="scan-row">
-  <input id="urlInput" class="input" placeholder="Paste a URL to scan">
-  <button id="scanBtn" type="submit" class="btn btn-primary">Scan</button>
+
+<input id="urlInput" class="input"
+placeholder="Paste a URL to scan">
+
+<button id="scanBtn" type="submit" class="btn btn-primary">
+Scan
+</button>
+
 </form>
 
 <div id="loading" class="loading" style="display:none">
-  <span class="spinner"></span>
-  Scanning URL...
+<span class="spinner"></span>
+Scanning URL...
 </div>
 
 <div id="result" style="display:none;margin-top:16px">
-  <span id="verdictBadge" class="badge"></span>
-  <span class="muted">
-    Score: <span id="scoreVal"></span> •
-    Confidence: <strong><span id="confidenceVal"></span>%</strong>
-  </span>
-  <p class="muted" id="normalizedLine"></p>
-  <div id="reasonsWrap"></div>
+
+<span id="verdictBadge" class="badge"></span>
+
+<span class="muted">
+Confidence:
+<strong><span id="confidenceVal"></span>%</strong>
+</span>
+
+<p class="muted" id="normalizedLine"></p>
+
+<div id="reasonsWrap"></div>
+
+<p class="muted">
+Engine:
+<span id="engineVal"></span>
+</p>
+
 </div>
 
 <!-- STATUS -->
 <div id="status" class="card">
-  <h3>Current Status</h3>
-  <ul>
-    <li><strong>Phase 2:</strong> Live Python backend deployed (Render) ✅</li>
-    <li>Explainable flags + confidence scoring</li>
-  </ul>
+
+<h3>Current Status</h3>
+
+<ul>
+
+<li>
+<strong>Phase 2:</strong>
+Live Python backend deployed (Render) ✅
+</li>
+
+<li>
+Heuristics + VirusTotal + Google Safe Browsing
+</li>
+
+<li>
+Domain age (WHOIS) analysis
+</li>
+
+<li>
+Entropy-based phishing detection
+</li>
+
+<li>
+Explainable detection reasons
+</li>
+
+</ul>
+
 </div>
 
 <!-- UPCOMING -->
 <div class="card">
-  <h3>Upcoming (Phase 3)</h3>
-  <ul>
-    <li>VirusTotal & OpenPhish intelligence</li>
-    <li>Reputation-based confidence boost</li>
-    <li>Unicode & homograph attack detection</li>
-    <li>ML-assisted risk calibration</li>
-  </ul>
+
+<h3>Upcoming (Phase 3)</h3>
+
+<ul>
+
+<li>Machine learning phishing classifier</li>
+<li>Adaptive model-based confidence scoring</li>
+<li>Continuous model training with phishing datasets</li>
+
+</ul>
+
 </div>
 
 </div>
 
 <script>
 
-/* ================= DOM references ================= */
+/* ================= DOM ================= */
+
 const urlInput = document.getElementById("urlInput");
 const loading = document.getElementById("loading");
 const result = document.getElementById("result");
 const verdictBadge = document.getElementById("verdictBadge");
-const scoreVal = document.getElementById("scoreVal");
 const confidenceVal = document.getElementById("confidenceVal");
 const normalizedLine = document.getElementById("normalizedLine");
 const reasonsWrap = document.getElementById("reasonsWrap");
+const engineVal = document.getElementById("engineVal");
 const scanBtn = document.getElementById("scanBtn");
 
 /* ================= BACKEND ================= */
+
 const BACKEND_URL =
-  location.hostname === "localhost"
-    ? "http://127.0.0.1:5000"
-    : "https://phishguardian-backend.onrender.com";
+location.hostname === "localhost"
+? "http://127.0.0.1:5000"
+: "https://phishguardian-backend.onrender.com";
 
 async function analyzeWithBackend(url){
-  try{
-    const r = await fetch(`${BACKEND_URL}/analyze`,{
-      method:"POST",
-      headers:{ "Content-Type":"application/json" },
-      body:JSON.stringify({url})
-    });
-    return await r.json();
-  }catch{return null}
+
+try{
+
+const r = await fetch(`${BACKEND_URL}/analyze`,{
+
+method:"POST",
+headers:{ "Content-Type":"application/json" },
+body:JSON.stringify({url})
+
+});
+
+return await r.json();
+
+}catch{
+
+return null;
+
 }
 
-/* ================= HEURISTICS ================= */
-
-const SUSPICIOUS_TLDS = [
-  ".ru",".cn",".tk",".xyz",".top",".site",".click",".support",".gq",".ml",".cf"
-];
-
-const PHISHY_KEYWORDS = [
-  "login","verify","secure","account","signin","reset","password",
-  "bank","payment","billing","invoice","refund","wallet",
-  "urgent","alert","suspended","locked","action",
-  "bonus","reward","free","claim",
-  "support","official","update","confirm"
-];
-
-/* ===== BRAND IMPERSONATION (EXPANDED) ===== */
-const BRAND_MISSPELLS = {
-  /* Global Banks */
-  "chase-login":"chase","citi-login":"citi","hsbc-login":"hsbc",
-  "barclays-login":"barclays","wellsfargo-login":"wellsfargo",
-  "bankofamerica-login":"bankofamerica","deutschebank-login":"deutschebank",
-
-  /* Indian Banks */
-  "hdfc-login":"hdfcbank","icici-login":"icicibank","sbi-login":"sbi",
-  "axis-login":"axisbank","kotak-login":"kotakbank","pnb-login":"pnb",
-  "yesbank-login":"yesbank","bob-login":"bankofbaroda",
-
-  /* Payments */
-  "paypal-login":"paypal","paypa1":"paypal","stripe-login":"stripe",
-  "paytm-login":"paytm","phonepe-login":"phonepe","gpay-login":"googlepay",
-
-  /* Crypto */
-  "binance-login":"binance","coinbase-login":"coinbase",
-  "kraken-login":"kraken","metamask-login":"metamask",
-  "trustwallet-login":"trustwallet","phantom-wallet":"phantom",
-
-  /* SaaS / Big Tech */
-  "google-login":"google","microsoft-login":"microsoft",
-  "appleid-login":"apple","github-login":"github",
-  "slack-login":"slack","zoom-login":"zoom",
-
-  /* E-commerce */
-  "amazon-login":"amazon","amaz0n":"amazon","flipkart-login":"flipkart",
-  "ebay-login":"ebay","aliexpress-login":"aliexpress","temu-login":"temu"
-};
-
-/* ===== WHITELIST BASE DOMAINS ===== */
-const WHITELIST_BASES = [
-  /* Banks */
-  "chase.com","citi.com","hsbc.com","barclays.co.uk","wellsfargo.com",
-  "bankofamerica.com","deutsche-bank.com",
-  "hdfcbank.com","icicibank.com","sbi.co.in","axisbank.com","kotak.com",
-  "pnbindia.in","yesbank.in","bankofbaroda.in",
-
-  /* Payments */
-  "paypal.com","stripe.com","paytm.com","phonepe.com","googlepay.com",
-
-  /* Crypto */
-  "binance.com","coinbase.com","kraken.com","metamask.io","trustwallet.com","phantom.app",
-
-  /* SaaS */
-  "google.com","accounts.google.com","microsoft.com","apple.com",
-  "github.com","slack.com","zoom.us",
-
-  /* E-commerce */
-  "amazon.com","amazon.in","flipkart.com","ebay.com","aliexpress.com","temu.com"
-];
-
-/* ================= HELPERS ================= */
-function normalizeUrl(u){if(!/^https?:\/\//i.test(u))u="http://"+u;return u}
-function hostOf(u){try{return new URL(u).hostname.toLowerCase()}catch{return""}}
-function isUnder(h,b){return h===b||h.endsWith("."+b)}
-
-/* ================= CONFIDENCE LOGIC ================= */
-function calculateConfidence(result, backendAlive){
-  let c = 0;
-  if(result.score===0 && result.flags.length===0) c+=40;
-  if(result.flags.some(f=>f.includes("Brand"))) c+=25;
-  if(result.flags.some(f=>f.includes("Raw IP"))) c+=20;
-  if(result.flags.some(f=>f.includes("Suspicious TLD"))) c+=15;
-  if(result.flags.length>=3) c+=15;
-  if(result.score>=5) c+=20;
-  else if(result.score>=2) c+=10;
-  if(backendAlive) c+=10;
-  return Math.min(100,Math.max(5,c));
 }
 
-/* ================= ANALYSIS ================= */
-function analyzeUrlBasic(input){
-  const url=normalizeUrl(input),host=hostOf(url),lower=url.toLowerCase();
-  let score=0,flags=[];
+/* ================= SCAN ================= */
 
-  for(const b of WHITELIST_BASES)
-    if(isUnder(host,b))
-      return{url,host,score:0,flags:[],verdict:"Safe",badge:"safe"};
+document.getElementById("scanForm")
+.addEventListener("submit", async e => {
 
-  if(/\d+\.\d+\.\d+\.\d+/.test(host)){flags.push("Raw IP address");score+=2}
-  for(const t of SUSPICIOUS_TLDS)
-    if(host.endsWith(t)){flags.push("Suspicious TLD");score+=2}
+e.preventDefault();
 
-  const hits=PHISHY_KEYWORDS.filter(k=>lower.includes(k));
-  if(hits.length){flags.push("Phishing keywords detected");score+=1}
-  if(hits.length>=3){flags.push("Multiple phishing keywords");score+=2}
+let url = urlInput.value.trim();
 
-  for(const b in BRAND_MISSPELLS)
-    if(lower.includes(b)){flags.push("Brand impersonation detected");score+=2}
+if(!url) return;
 
-  let verdict="Safe",badge="safe";
-  if(score>=5){verdict="Dangerous";badge="danger"}
-  else if(score>=2){verdict="Suspicious";badge="suspicious"}
+if(!/^https?:\/\//i.test(url))
+url = "http://" + url;
 
-  return{url,host,score,flags,verdict,badge};
-}
+result.style.display = "none";
 
-/* ================= UI ================= */
+scanBtn.disabled = true;
 
-document.getElementById("scanForm").addEventListener("submit", async e=>{
-  e.preventDefault();
-
-  const val = normalizeUrl(urlInput.value.trim());
-  if(!val) return;
-
-  result.style.display = "none";
-  scanBtn.disabled = true;
 loading.style.display = "flex";
 
-const backend = await analyzeWithBackend(val);
+const backend = await analyzeWithBackend(url);
 
 loading.style.display = "none";
+
 scanBtn.disabled = false;
 
-  if(!backend){
-    alert("Backend not reachable");
-    return;
-  }
+if(!backend){
 
-  const verdict = backend.final_verdict.verdict;
-  const confidence = backend.final_verdict.confidence;
-  const reasons = backend.final_verdict.reasons;
-  const host = hostOf(val);
+alert("Backend not reachable");
 
-  verdictBadge.textContent = verdict;
+return;
 
-  verdictBadge.className = "badge ";
-  if(verdict === "Safe") verdictBadge.className += "safe";
-  else if(verdict === "Suspicious") verdictBadge.className += "suspicious";
-  else verdictBadge.className += "danger";
+}
 
-  scoreVal.textContent = backend.final_verdict.risk_score;
-  confidenceVal.textContent = confidence;
+const verdict = backend.final_verdict.verdict;
+const confidence = backend.final_verdict.confidence;
+const reasons = backend.final_verdict.reasons;
 
-  normalizedLine.textContent = `URL: ${val} • Host: ${host}`;
+const host = new URL(url).hostname;
 
-  const ul = document.createElement("ul");
+/* verdict */
 
-  reasons.forEach(r=>{
-    const li = document.createElement("li");
-    li.textContent = r;
-    ul.appendChild(li);
-  });
+verdictBadge.textContent = verdict;
 
-  reasonsWrap.innerHTML = "";
-  reasonsWrap.appendChild(ul);
+verdictBadge.className = "badge ";
 
-  result.style.display = "block";
+if(verdict === "Safe")
+verdictBadge.className += "safe";
+
+else if(verdict === "Suspicious")
+verdictBadge.className += "suspicious";
+
+else
+verdictBadge.className += "danger";
+
+/* confidence */
+
+confidenceVal.textContent = confidence;
+
+/* engine */
+
+engineVal.textContent = backend.engine;
+
+/* url */
+
+normalizedLine.textContent = `URL: ${url} • Host: ${host}`;
+
+/* reasons */
+
+const ul = document.createElement("ul");
+
+reasons.forEach(r=>{
+
+const li = document.createElement("li");
+
+li.textContent = r;
+
+ul.appendChild(li);
+
+});
+
+reasonsWrap.innerHTML = "";
+
+reasonsWrap.appendChild(ul);
+
+/* show */
+
+result.style.display = "block";
+
 });
 
 </script>
 
-<footer class="muted" style="margin-top:40px;text-align:center;font-size:13px;">
-  © 2025 PhishGuardian — Built for learning & security awareness.  
-  Not a replacement for professional security tools.
+<footer class="muted"
+style="margin-top:40px;text-align:center;font-size:13px;">
+
+© 2025 PhishGuardian — Built for learning & security awareness.
+Not a replacement for professional security tools.
+
 </footer>
 
 </body>
